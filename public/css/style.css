@@ -1,0 +1,75 @@
+:root {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+	--header-bg-color: #333;
+	--header-fg-color: #ccc;
+	--main-bg-color: rgb(245, 245, 245);
+	--main-content-bg-color: #fff;
+}
+
+* {
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	background-color: var(--main-bg-color);
+}
+
+header {
+	background-color: var(--header-bg-color);
+	color: var(--header-fg-color);
+	font-size: 10pt;
+	display: flex;
+}
+
+header #actions {
+}
+
+header #actions button {
+	background-color: var(--header-bg-color);
+	color: var(--header-fg-color);
+	border: 0;
+	width: 4rem;
+	height: 100%;
+	padding: 0rem 0rem 0rem 0rem;
+}
+
+header #search {
+	flex-grow: 1;
+}
+
+header #search input {
+	background-color: var(--header-bg-color);
+	color: var(--header-fg-color);
+	padding: 1rem;
+	font-size: 1rem;
+	border: 0;
+	width: 100%;
+	outline: none;
+}
+
+header #search input::placeholder {
+	color: var(--header-fg-color);
+	opacity: 0.2;
+}
+
+section#main {
+	padding: 4rem;
+	line-height: 1.5rem;
+}
+
+section#main #content {
+	background-color: var(--main-content-bg-color);
+	padding: 4rem;
+	border-radius: .5rem;
+}
+
+section#main h1 {
+	margin-bottom: 2rem;
+	font-size: 3rem;
+}
+
+section#main {
+
+}
