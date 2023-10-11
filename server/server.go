@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/emmanuelay/zwiki/nodes"
+	assets "github.com/emmanuelay/zwiki/public"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -23,19 +24,18 @@ func NewApi(port int, repo nodes.Repository) *Api {
 }
 
 func (api *Api) Serve() {
-	fmt.Println("api:serve")
+	var staticFS = http.FS(assets.Public)
+	fs := http.FileServer(staticFS)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/all", api.getAll)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+	r.Handle("/*", fs)
 	http.ListenAndServe(fmt.Sprintf(":%d", api.port), r)
 }
 
 func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
-	nodes, err := a.repo.GetAll()
+	nodes, err := a.repo.GetAll(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("getAll failed"))
