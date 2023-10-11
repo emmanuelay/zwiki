@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/emmanuelay/zwiki/nodes"
@@ -29,9 +30,20 @@ func (api *Api) Serve() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Get("/all", api.getAll)
+	r.Route("/api", func(apiRouter chi.Router) {
+		apiRouter.Get("/all", api.getAll)
+		apiRouter.Get("/{slug}", api.getNode)
+		apiRouter.Put("/{slug}", api.updateNode)
+		apiRouter.Post("/{slug}", api.createNode)
+		apiRouter.Delete("/{slug}", api.deleteNode)
+	})
+
 	r.Handle("/*", fs)
-	http.ListenAndServe(fmt.Sprintf(":%d", api.port), r)
+
+	fmt.Printf("Listning on http://localhost:%d ... \n", api.port)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", api.port), r); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +54,7 @@ func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, err := json.Marshal(nodes)
+	content, err := json.MarshalIndent(nodes, "", "\t")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("getAll json marshalling failed"))
