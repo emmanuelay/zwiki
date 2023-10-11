@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -11,7 +12,7 @@ import (
 )
 
 type Repository interface {
-	GetAll(ctx context.Context) ([]models.Node, error)
+	GetAll(ctx context.Context) (models.Folder, error)
 	GetNode(ctx context.Context, path string) (models.Node, error)
 	CreateNode(ctx context.Context, path string, node models.Node) error
 	UpdateNode(ctx context.Context, path string, node models.Node) error
@@ -28,13 +29,14 @@ func NewFileSystemRepository(root string) Repository {
 	}
 }
 
-func (repo *fileSystemRepository) GetAll(ctx context.Context) ([]models.Node, error) {
+func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, error) {
 	absoluteRoot, err := filepath.Abs(repo.root)
 	if err != nil {
-		return nil, err
+		return models.Folder{}, err
 	}
 
 	nodes := []models.Node{}
+	// rootFolder := models.Folder{ID: "root"}
 
 	err = filepath.WalkDir(absoluteRoot, func(path string, d fs.DirEntry, err error) error {
 
@@ -43,9 +45,15 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) ([]models.Node, er
 		}
 
 		if filepath.Ext(d.Name()) == ".md" && !d.IsDir() {
-			nodes = append(nodes, models.Node{
-				ID: path,
-			})
+			node := models.Node{
+				ID:   strings.ReplaceAll(path, absoluteRoot, ""),
+				Slug: models.Slug(strings.ReplaceAll(d.Name(), ".md", "")),
+			}
+			if fi, err := d.Info(); err == nil {
+				node.ModTime = fi.ModTime().Unix()
+			}
+
+			nodes = append(nodes, node)
 			return nil
 		}
 
@@ -57,12 +65,27 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) ([]models.Node, er
 	})
 
 	if err != nil {
-		return nil, err
+		return models.Folder{}, err
+	}
+
+	// Augment list of nodes to tree
+	root := models.Folder{
+		ID:      "root",
+		Folders: []models.Folder{},
+		Nodes:   []models.Node{},
+	}
+
+	for idx := range nodes {
+		node := nodes[idx]
+		path := filepath.Dir(node.ID)
+		//file := filepath.Base(node.ID)
+		folder := root.FindFolder(strings.Split(path, string(os.PathSeparator)))
+		folder.Nodes = append(folder.Nodes, node)
 	}
 
 	// TODO(ea): read frontmatter & timestamps of all files
 
-	return nodes, nil
+	return root, nil
 }
 
 func (repo *fileSystemRepository) GetNode(ctx context.Context, path string) (models.Node, error) {
