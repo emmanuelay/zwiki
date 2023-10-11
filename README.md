@@ -1,11 +1,12 @@
 # Zettlekasten Wiki
 
-För att kunna skriva ett frontend till en wiki behövs:
+The purpose of this project is to provide a web based wiki for a local filesystem folder full of markdown files.
+The UI should be inspired by the Zettlekasten method and use tags & links for navigation between cards.
 
-| endpoint                 | funktion                      |
-| ------------------------ | ----------------------------- |
-| /all                     | hämta samtliga noder i wikin  |
-| /wiki/{node-path}        | hämta en specifik nod i wikin |
-| /wiki/{node-path}/edit   | editera en specifik nod       |
-| /wiki/{node-path}/create | skapa en specifik nod         |
-| /wiki/{node-path}/delete | radera en specifik nod        |
+The markdown files should use frontmatter for metadata and markdown for formatting.
+
+## To-do
+
+- [ ] Traverse folder structure and read front matter for all files
+- [ ] Tree view to navigate the folder structure
+- [ ] View markdown files as HTML
