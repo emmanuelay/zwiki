@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -33,30 +34,36 @@ func (api *Api) Serve() {
 	http.ListenAndServe(fmt.Sprintf(":%d", api.port), r)
 }
 
-func (api *Api) getAll(w http.ResponseWriter, r *http.Request) {
-	nodes, err := api.repo.getAll()
+func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
+	nodes, err := a.repo.GetAll()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("getAll failed"))
 		return
 	}
 
-	w.Write([]byte("getAll"))
-	w.Write(nodes)
+	content, err := json.Marshal(nodes)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("getAll json marshalling failed"))
+		return
+	}
+
+	w.Write([]byte(string(content)))
 }
 
-func (api *Api) getNode(w http.ResponseWriter, r *http.Request) {
+func (a *Api) getNode(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("getNode"))
 }
 
-func (api *Api) updateNode(w http.ResponseWriter, r *http.Request) {
+func (a *Api) updateNode(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("updateNode"))
 }
 
-func (api *Api) createNode(w http.ResponseWriter, r *http.Request) {
+func (a *Api) createNode(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("createNode"))
 }
 
-func (api *Api) deleteNode(w http.ResponseWriter, r *http.Request) {
+func (a *Api) deleteNode(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("deleteNode"))
 }
