@@ -3,6 +3,7 @@ package nodes
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -78,18 +79,31 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 	for idx := range nodes {
 		node := nodes[idx]
 		path := filepath.Dir(node.ID)
-		//file := filepath.Base(node.ID)
 		folder := root.FindFolder(strings.Split(path, string(os.PathSeparator)))
 		folder.Nodes = append(folder.Nodes, node)
 	}
-
-	// TODO(ea): read frontmatter & timestamps of all files
 
 	return root, nil
 }
 
 func (repo *fileSystemRepository) GetNode(ctx context.Context, path string) (models.Node, error) {
-	return models.Node{}, errors.New("not implemented")
+	fullPath := filepath.Join(repo.root, path)
+	absolutePath, err := filepath.Abs(fullPath)
+	if err != nil {
+		return models.Node{}, fmt.Errorf("failed building path: %w", err)
+	}
+
+	data, err := os.ReadFile(absolutePath)
+	if err != nil {
+		return models.Node{}, fmt.Errorf("failed reading file at '%v': %w", absolutePath, err)
+	}
+
+	node := models.Node{
+		ID:      absolutePath,
+		Content: string(data),
+	}
+
+	return node, nil
 }
 
 func (repo *fileSystemRepository) CreateNode(ctx context.Context, path string, node models.Node) error {
