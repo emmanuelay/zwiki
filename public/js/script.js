@@ -22,10 +22,8 @@ async function fetchTree() {
 }
 
 function renderTree(tree) {
-	console.log("rendertree - tree: ", tree);
-
+	console.log("rendertree - tree:", tree);
 	const rootNode = document.getElementById("toc");
-	console.log("rendertree - remove " + rootNode.children.length + " children");
 
 	for (let index = 0; index < rootNode.children.length; index++) {
 		const child = rootNode.children[index];
@@ -55,7 +53,10 @@ function renderTreeElement(rootElement, rootFolder) {
 			for (let fileIndex = 0; fileIndex < folder.nodes.length; fileIndex++) {
 				const node = folder.nodes[fileIndex];
 				const li = document.createElement("li");
-				li.innerText = node.title;
+				const ahref = document.createElement("a");
+				ahref.innerText = node.title;
+				ahref.addEventListener("click",function(){loadNode(node.id)})
+				li.appendChild(ahref);
 				returned.appendChild(li);
 			}
 		}
@@ -64,4 +65,20 @@ function renderTreeElement(rootElement, rootFolder) {
 	rootElement.appendChild(ul);
 	
 	return ul;
+}
+
+async function loadNode(path) {
+	console.log("loadNode - attempting to load:", path);
+
+	const response = await fetch('/api/get?node=' + path);
+	if (!response.ok) {
+		const message = `An error has occured: ${response.status}`;
+		throw new Error(message);
+	}
+	
+	const node = await response.json();
+	console.log("loadNode - fetched", node);
+
+	let content = document.getElementById("node")
+	content.innerText = node.data.content;
 }
