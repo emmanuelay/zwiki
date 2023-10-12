@@ -36,7 +36,6 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 	}
 
 	nodes := []models.Node{}
-	// rootFolder := models.Folder{ID: "root"}
 
 	err = filepath.WalkDir(absoluteRoot, func(path string, d fs.DirEntry, err error) error {
 
@@ -46,8 +45,9 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 
 		if filepath.Ext(d.Name()) == ".md" && !d.IsDir() {
 			node := models.Node{
-				ID:   strings.ReplaceAll(path, absoluteRoot, ""),
-				Slug: models.Slug(strings.ReplaceAll(d.Name(), ".md", "")),
+				ID:    strings.ReplaceAll(path, absoluteRoot, ""),
+				Title: strings.TrimSuffix(filepath.Base(path), ".md"),
+				Slug:  models.Slug(strings.ReplaceAll(d.Name(), ".md", "")),
 			}
 			if fi, err := d.Info(); err == nil {
 				node.ModTime = fi.ModTime().Unix()
