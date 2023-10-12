@@ -5,25 +5,32 @@
 	--header-fg-color: #ccc;
 	--main-bg-color: rgb(245, 245, 245);
 	--main-content-bg-color: #fff;
-}
-
-* {
-	padding: 0;
-	margin: 0;
+	--toc-content-bg-color: rgb(233,233,233);
+	--toc-content-fg-color: rgb(100,100,100);
 }
 
 body {
 	background-color: var(--main-bg-color);
+	padding: 0;
+	margin: 0;
+}
+
+#container {
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
+	height: 100vh;
+	padding: 0;
+	margin: 0;
+
 }
 
 header {
+	display: block;
 	background-color: var(--header-bg-color);
 	color: var(--header-fg-color);
 	font-size: 10pt;
 	display: flex;
-}
-
-header #actions {
 }
 
 header #actions button {
@@ -32,7 +39,7 @@ header #actions button {
 	border: 0;
 	width: 4rem;
 	height: 100%;
-	padding: 0rem 0rem 0rem 0rem;
+	padding: 0;
 }
 
 header #search {
@@ -45,7 +52,6 @@ header #search input {
 	padding: 1rem;
 	font-size: 1rem;
 	border: 0;
-	width: 100%;
 	outline: none;
 }
 
@@ -54,22 +60,39 @@ header #search input::placeholder {
 	opacity: 0.2;
 }
 
-section#main {
-	padding: 4rem;
-	line-height: 1.5rem;
+section#main {	
+	display: flex;
+	flex-grow: 1;
 }
 
-section#main #content {
+section#main #toc {
+	width: 40rem;
+	padding: 2rem;
+	margin: 0;
+	background-color: var(--toc-content-bg-color);
+	color: var(--toc-content-fg-color);
+}
+
+section#main #toc ul:first-child {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+section#main #node {
 	background-color: var(--main-content-bg-color);
-	padding: 4rem;
 	border-radius: .5rem;
+	padding: 2rem;
+	margin: 2rem;
 }
 
 section#main h1 {
-	margin-bottom: 2rem;
+	display: block;
+	padding: 0;
+	margin: 0 0 2rem 0;
 	font-size: 3rem;
 }
 
-section#main {
-
+section#main p {
+	line-height: 1.5rem;
 }
