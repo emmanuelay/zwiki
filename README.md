@@ -7,6 +7,11 @@ The markdown files should use frontmatter for metadata and markdown for formatti
 
 ## To-do
 
-- [ ] Traverse folder structure and read front matter for all files
-- [ ] Tree view to navigate the folder structure
+- [ ] Implement view node
+- [ ] Implement edit/update node
 - [ ] View markdown files as HTML
+- [ ] Implement create new node
+- [ ] Read front matter for all files
+- [ ] Implement delete node
+- [x] Traverse folder structure
+- [x] Tree view to navigate the folder structure
