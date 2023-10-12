@@ -17,66 +17,40 @@ body {
 
 #container {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
+	position: fixed;
 	width: 100vw;
 	height: 100vh;
 	padding: 0;
 	margin: 0;
-
-}
-
-header {
-	display: block;
-	background-color: var(--header-bg-color);
-	color: var(--header-fg-color);
-	font-size: 10pt;
-	display: flex;
-}
-
-header #actions button {
-	background-color: var(--header-bg-color);
-	color: var(--header-fg-color);
-	border: 0;
-	width: 4rem;
-	height: 100%;
-	padding: 0;
-}
-
-header #search {
-	flex-grow: 1;
-}
-
-header #search input {
-	background-color: var(--header-bg-color);
-	color: var(--header-fg-color);
-	padding: 1rem;
-	font-size: 1rem;
-	border: 0;
-	outline: none;
-}
-
-header #search input::placeholder {
-	color: var(--header-fg-color);
-	opacity: 0.2;
 }
 
 section#main {	
 	display: flex;
-	flex-grow: 1;
+	width: 100%;
 }
 
 section#main #toc {
-	width: 40rem;
+	flex-grow: 0;
+	min-width: 20rem;
 	padding: 2rem;
 	margin: 0;
 	background-color: var(--toc-content-bg-color);
 	color: var(--toc-content-fg-color);
+	overflow-y: scroll; 
 }
 
 section#main #toc ul:first-child {
 	list-style: none;
 	margin: 0;
 	padding: 0;
+}
+
+section#main #content {
+	flex-grow: 4;
+	width: auto;
+	height: 100%;
+	overflow-y: scroll; 
 }
 
 section#main #node {
