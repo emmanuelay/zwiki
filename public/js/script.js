@@ -3,11 +3,25 @@ document.addEventListener('DOMContentLoaded', onLoad);
 function onLoad(event) {
 	console.log("domcontentloaded");
 
+	const btnEdit = document.getElementById("btnEdit");
+	btnEdit.addEventListener("click", toggleEditor)
+
 	fetchTree()
 		.then(renderTree)
 		.catch(error => {
 			console.log("fetch failed", error)
 		});
+}
+
+function toggleEditor(event) {
+	console.log("click");
+	const viewer = document.getElementById("node");
+	const editor = document.getElementById("editor");
+
+	editor.classList.toggle("hidden");
+	viewer.classList.toggle("hidden");
+	
+	
 }
 
 async function fetchTree() {

@@ -1,0 +1,34 @@
+#content {
+	background-color: var(--content-bg-color);
+	color: var(--content-fg-color);
+}
+
+#content .header {
+	position: sticky;
+	top: 0;
+	padding: 2rem;
+	background-color: var(--content-header-bg-color);
+	color: var(--content-header-fg-color);
+}
+
+#content .header h1 {
+	text-transform: uppercase;
+	font-size: 1.3rem;
+	font-weight: 700;
+}
+
+#content .viewer {
+	padding: 6rem 10rem 4rem 10rem;
+}
+
+#content .viewer h1 {
+	font-size: 3rem;
+	margin-bottom: 4rem;
+	color: #555;
+}
+
+#content .viewer p {
+	font-size: 1.5rem;
+	line-height: 2.5rem;
+	margin-bottom: 1.5rem;
+}

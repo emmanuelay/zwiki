@@ -25,14 +25,15 @@ body {
 	margin: 0;
 }
 
-section#main {	
+#main {	
 	display: flex;
 	width: 100%;
 }
 
-section#main #toc {
+#main #toc {
 	flex-grow: 0;
-	min-width: 20rem;
+	width: 20rem;
+
 	padding: 2rem;
 	margin: 0;
 	background-color: var(--toc-content-bg-color);
@@ -40,33 +41,59 @@ section#main #toc {
 	overflow-y: scroll; 
 }
 
-section#main #toc ul:first-child {
+#main #toc ul:first-child {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-section#main #content {
+#content {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
 	flex-grow: 4;
-	width: auto;
-	height: 100%;
+	padding: 0;
+	margin: 0;
 	overflow-y: scroll; 
+	background-color: green;
 }
 
-section#main #node {
+#node {
 	background-color: var(--main-content-bg-color);
 	border-radius: .5rem;
 	padding: 2rem;
+	margin: 2rem;	
+}
+
+.hidden {
+	display: none !important;
+}
+
+#editor {
+	display: flex;
+	flex-direction: column;
 	margin: 2rem;
 }
 
-section#main h1 {
+#node-editor {
+	padding: 2rem;
+	border: 0px;
+	resize: none;
+	height: 40rem;
+	background-color: var(--main-content-bg-color);
+	border-radius: .5rem;
+	font-size: 12pt;
+	font-family: 'Courier New', Courier, monospace;
+}
+
+#main h1 {
 	display: block;
 	padding: 0;
 	margin: 0 0 2rem 0;
 	font-size: 3rem;
 }
 
-section#main p {
+#main p {
 	line-height: 1.5rem;
 }

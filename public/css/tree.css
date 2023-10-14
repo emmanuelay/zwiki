@@ -1,0 +1,136 @@
+.tree,
+.tree ul,
+.tree li {
+	display: block;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	text-decoration: none;
+	text-align: left;
+	text-align-last: left;
+	font-size: 1.5rem;
+}
+
+.tree ul:before,
+.tree li:before,
+.tree li:after {
+	position: absolute;
+	right: auto;
+	content: '';
+	--webkit-user-select: none;
+}
+
+.tree {
+	padding: 2rem;
+}
+
+.tree,
+.tree ul:before,
+.tree li:before {
+	bottom: auto;
+}
+
+.tree ul,
+.tree li {
+	position: relative;
+	padding: 0 0 5px;
+}
+
+.tree ul:before,
+.tree li:after {
+	background: #a6a6a6;
+}
+
+.tree ul:before {
+	width: 0px;
+	height: 1px;
+	top: 0;
+	left: 6px;
+}
+
+.tree li {
+	padding: 0 0 0 2rem;
+}
+
+.tree li label {
+	display: inline-block;
+	cursor: pointer;
+}
+
+.tree input {
+	display: none;
+}
+
+.tree input[type="checkbox"]~ul {
+	display: none;
+}
+
+.tree input[type="checkbox"]:checked~ul {
+	display: block;
+}
+
+.tree li:before {
+	content: "";
+	background: transparent 0 2px repeat-x url('data:image/gif;base64,R0lGODlhAQABAPAAAKampgAAACwAAAAAAQABAAACAkQBADs=');
+	width: 15px;
+	top: 7px;
+	left: 0;
+	text-align-last: right;
+	text-align: right;
+	height: 5px;
+}
+
+.tree li:after {
+	height: auto;
+	width: 1px;
+	top: 0;
+	left: 0;
+	bottom: 0;
+}
+
+.tree li:last-child:after {
+	height: 9px
+}
+
+/* Folder, closed */
+.tree input[type="checkbox"]~label {
+	display: inline-block;
+	width: 100%;
+	background-image: url(/img/folder.closed.svg);
+	background-repeat: no-repeat;
+	background-size: 1rem 1rem;
+	background-position: left center;
+	padding-left: 1.8rem;
+	color: #555;
+}
+
+.tree input[type="checkbox"]~label:hover {
+	color: #000;
+}
+
+/* Folder, open */
+.tree input[type="checkbox"]:checked~label {
+	background-image: url(/img/folder.open.svg);
+	background-repeat: no-repeat;
+	background-size: 1rem 1rem;
+	background-position: left center;
+	padding-left: 1.8rem;
+}
+
+/* Document */
+.tree li span {
+	display: inline-block;
+	width: 100%;
+	background-image: url(/img/document.svg);
+	background-repeat: no-repeat;
+	background-size: 1.3rem 1.3rem;
+	background-position: left center;
+	padding-left: 2rem;
+	cursor: pointer;
+	color: #888;
+}
+
+.tree li span:hover {
+	color: #000;
+}
