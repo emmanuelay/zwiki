@@ -21,6 +21,7 @@ html {
 }
 
 #toc {
+	border-right: 1px solid #ddd;
 	flex: 0 0 35rem;
 	overflow: hidden auto;
 }
@@ -28,4 +29,12 @@ html {
 #content {
 	flex: 1 1 auto;
 	overflow: hidden auto;
+}
+
+.header {
+	height: 8rem;
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	border-bottom: 1px solid rgba(0, 0, 0, .05);
 }

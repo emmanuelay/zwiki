@@ -1,4 +1,7 @@
 #content {
+	display: flex;
+	flex-flow: column nowrap;
+	height: 100vh;
 	background-color: var(--content-bg-color);
 	color: var(--content-fg-color);
 }
@@ -9,6 +12,11 @@
 	padding: 2rem;
 	background-color: var(--content-header-bg-color);
 	color: var(--content-header-fg-color);
+
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-flow: row nowrap;
 }
 
 #content .header h1 {
@@ -17,7 +25,23 @@
 	font-weight: 700;
 }
 
+#content .header button {
+	text-transform: uppercase;
+	font-size: 1.3rem;
+	border: 0;
+	padding: 1rem 4rem;
+	background-color: #ccc;
+	border-radius: .5rem;
+	cursor: pointer;
+}
+
+#content .header button:hover {
+	background-color: #333;
+	color: #fff;
+}
+
 #content .viewer {
+	flex: 1 1 auto;
 	padding: 6rem 10rem 4rem 10rem;
 }
 
