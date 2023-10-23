@@ -9,6 +9,7 @@
 
 	background-color: var(--toc-header-bg-color);
 	color: var(--toc-header-fg-color);
+	z-index: 99;
 }
 
 #toc .header h1 {

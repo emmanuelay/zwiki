@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', onLoad);
 function onLoad(event) {
 	console.log("domcontentloaded");
 
-	const btnEdit = document.getElementById("btnEdit");
-	btnEdit.addEventListener("click", toggleEditor)
+	// const btnEdit = document.getElementById("btnEdit");
+	// btnEdit.addEventListener("click", toggleEditor)
 
 	fetchTree()
 		.then(renderTree)
@@ -37,7 +37,7 @@ async function fetchTree() {
 
 function renderTree(tree) {
 	console.log("rendertree - tree:", tree);
-	const rootNode = document.getElementById("toc");
+	const rootNode = document.getElementById("tree");
 
 	for (let index = 0; index < rootNode.children.length; index++) {
 		const child = rootNode.children[index];
@@ -53,24 +53,36 @@ function renderTreeElement(rootElement, rootFolder) {
 	for (let index = 0; index < rootFolder.folders.length; index++) {
 		const folder = rootFolder.folders[index];
 		const li = document.createElement("li");
-		const details = document.createElement("details");
-		const summary = document.createElement("summary");
 
-		summary.innerText = folder.id;
-		details.appendChild(summary);
-		li.appendChild(details);
+		// <input type="checkbox" id="11" />
+		// <label for="11">11</label>
+
+		const checkbox = document.createElement("input");
+		const label = document.createElement("label");
+
+		checkbox.type = "checkbox";
+		checkbox.id = folder.id;
+		label.htmlFor = folder.id;
+		label.innerText = folder.name;
+
+		li.appendChild(checkbox);
+		li.appendChild(label);
+
+		
+
+		let returned = renderTreeElement(li, folder);
 		ul.appendChild(li);
-
-		let returned = renderTreeElement(details, folder);
 
 		if (folder.nodes != null) { 
 			for (let fileIndex = 0; fileIndex < folder.nodes.length; fileIndex++) {
 				const node = folder.nodes[fileIndex];
 				const li = document.createElement("li");
+				const span = document.createElement("span");
 				const ahref = document.createElement("a");
 				ahref.innerText = node.title;
-				ahref.addEventListener("click",function(){loadNode(node.id)})
-				li.appendChild(ahref);
+				ahref.addEventListener("click",function(){loadNode(node.path)})
+				span.appendChild(ahref);
+				li.appendChild(span);
 				returned.appendChild(li);
 			}
 		}
@@ -93,6 +105,6 @@ async function loadNode(path) {
 	const node = await response.json();
 	console.log("loadNode - fetched", node);
 
-	let content = document.getElementById("node")
+	let content = document.getElementById("viewer")
 	content.innerText = node.data.content;
 }
