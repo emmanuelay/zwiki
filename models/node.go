@@ -8,6 +8,9 @@ type Node struct {
 	// ID is used to uniquely point to a specific node
 	ID string `json:"id"`
 
+	// Path is used to locate a resource
+	Path string `json:"path"`
+
 	// Slug is used for navigation purposes
 	Slug string `json:"-"`
 

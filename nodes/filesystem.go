@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/emmanuelay/zwiki/models"
+	"github.com/emmanuelay/zwiki/pkg/md5"
 )
 
 type Repository interface {
@@ -46,7 +47,8 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 
 		if filepath.Ext(d.Name()) == ".md" && !d.IsDir() {
 			node := models.Node{
-				ID:    strings.ReplaceAll(path, absoluteRoot, ""),
+				ID:    md5.Hash(path),
+				Path:  strings.ReplaceAll(path, absoluteRoot, ""),
 				Title: strings.TrimSuffix(filepath.Base(path), ".md"),
 				Slug:  models.Slug(strings.ReplaceAll(d.Name(), ".md", "")),
 			}
@@ -78,7 +80,7 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 
 	for idx := range nodes {
 		node := nodes[idx]
-		path := filepath.Dir(node.ID)
+		path := filepath.Dir(node.Path)
 		folder := root.FindFolder(strings.Split(path, string(os.PathSeparator)))
 		folder.Nodes = append(folder.Nodes, node)
 	}
