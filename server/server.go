@@ -39,8 +39,8 @@ func (api *Api) Serve() {
 
 	r.Route("/api", func(apiRouter chi.Router) {
 		apiRouter.Get("/all", api.getAll)
-		apiRouter.Get("/get", api.getNode)
-		apiRouter.Put("/update", api.updateNode)
+		apiRouter.Get("/get/{node}", api.getNode)
+		apiRouter.Put("/update/{node}", api.updateNode)
 		apiRouter.Post("/create", api.createNode)
 		apiRouter.Delete("/delete", api.deleteNode)
 	})
@@ -64,7 +64,7 @@ func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Api) getNode(w http.ResponseWriter, r *http.Request) {
-	slug := r.URL.Query().Get("node")
+	slug := chi.URLParam(r, "node")
 	slug = strings.TrimSpace(slug)
 
 	if len(slug) == 0 {
@@ -82,7 +82,38 @@ func (a *Api) getNode(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Api) updateNode(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, http.StatusOK, map[string]string{"status": "updateNode"})
+	slug := chi.URLParam(r, "node")
+	slug = strings.TrimSpace(slug)
+
+	if len(slug) == 0 {
+		respondWithError(w, http.StatusBadRequest, "invalid slug")
+		return
+	}
+
+	var payload struct {
+		Content string `json:"content"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid payload")
+		return
+	}
+
+	node, err := a.repo.GetNode(r.Context(), slug)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed retrieving node '%v': %v", slug, err.Error()))
+		return
+	}
+
+	node.Content = payload.Content
+
+	if err := a.repo.UpdateNode(r.Context(), slug, node); err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed updating node '%v': %v", slug, err.Error()))
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "updateNode", "data": node})
 }
 
 func (a *Api) createNode(w http.ResponseWriter, r *http.Request) {
