@@ -38,11 +38,11 @@ func (api *Api) Serve() {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/api", func(apiRouter chi.Router) {
-		apiRouter.Get("/all", api.getAll)
-		apiRouter.Get("/get/{node}", api.getNode)
-		apiRouter.Put("/update/{node}", api.updateNode)
-		apiRouter.Post("/create", api.createNode)
-		apiRouter.Delete("/delete", api.deleteNode)
+		apiRouter.Get("/all", api.GetAll)
+		apiRouter.Get("/get/{node}", api.GetNode)
+		apiRouter.Put("/update/{node}", api.UpdateNode)
+		apiRouter.Post("/create", api.CreateNode)
+		apiRouter.Delete("/delete", api.DeleteNode)
 	})
 
 	r.Handle("/*", fs)
@@ -53,7 +53,7 @@ func (api *Api) Serve() {
 	}
 }
 
-func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
+func (a *Api) GetAll(w http.ResponseWriter, r *http.Request) {
 	nodes, err := a.repo.GetAll(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "getAll failed")
@@ -63,8 +63,8 @@ func (a *Api) getAll(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, 200, nodes)
 }
 
-func (a *Api) getNode(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "node")
+func (a *Api) GetNode(w http.ResponseWriter, r *http.Request) {
+	slug := r.URL.Query().Get("node")
 	slug = strings.TrimSpace(slug)
 
 	if len(slug) == 0 {
@@ -81,8 +81,8 @@ func (a *Api) getNode(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "getNode", "data": node})
 }
 
-func (a *Api) updateNode(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "node")
+func (a *Api) UpdateNode(w http.ResponseWriter, r *http.Request) {
+	slug := r.URL.Query().Get("node")
 	slug = strings.TrimSpace(slug)
 
 	if len(slug) == 0 {
@@ -116,11 +116,11 @@ func (a *Api) updateNode(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "updateNode", "data": node})
 }
 
-func (a *Api) createNode(w http.ResponseWriter, r *http.Request) {
+func (a *Api) CreateNode(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]string{"status": "createNode"})
 }
 
-func (a *Api) deleteNode(w http.ResponseWriter, r *http.Request) {
+func (a *Api) DeleteNode(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]string{"status": "deleteNode"})
 }
 
