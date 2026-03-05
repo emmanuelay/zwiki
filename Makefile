@@ -1,13 +1,19 @@
 BINARY_NAME=zwiki
+BUILD_DIR=./tmp
 
-build:
-	GOARCH=amd64 GOOS=darwin go build -o ${BINARY_NAME}-darwin cmd/zwiki/main.go
+.DEFAULT_GOAL := help
 
-run: build
-	./${BINARY_NAME}-darwin
+help: ## Show available commands
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-10s %s\n", $$1, $$2}'
 
-clean:
-	go clean
-	rm ${BINARY_NAME}-darwin
+build: ## Build the binary
+	go build -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/zwiki
 
-restart: build run
+run: build ## Build and run the server
+	$(BUILD_DIR)/$(BINARY_NAME) -path ./tests -port 1337
+
+test: ## Run all tests
+	go test ./...
+
+develop: ## Run with hot reload
+	air

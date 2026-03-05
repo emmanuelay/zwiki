@@ -48,10 +48,22 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 		}
 
 		if filepath.Ext(d.Name()) == ".md" && !d.IsDir() {
+			title := strings.TrimSuffix(filepath.Base(path), ".md")
+
+			// Read frontmatter title if available
+			if data, readErr := os.ReadFile(path); readErr == nil {
+				var matter map[string]any
+				if _, parseErr := frontmatter.Parse(bytes.NewReader(data), &matter); parseErr == nil {
+					if fmTitle, ok := matter["title"].(string); ok && fmTitle != "" {
+						title = fmTitle
+					}
+				}
+			}
+
 			node := models.Node{
 				ID:    md5.Hash(path),
 				Path:  strings.ReplaceAll(path, absoluteRoot, ""),
-				Title: strings.TrimSuffix(filepath.Base(path), ".md"),
+				Title: title,
 				Slug:  models.Slug(strings.ReplaceAll(d.Name(), ".md", "")),
 			}
 			if fi, err := d.Info(); err == nil {

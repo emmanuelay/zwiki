@@ -51,6 +51,21 @@
 	border-bottom-color: #2563eb;
 }
 
+#viewer a.wiki-link {
+	color: #7c3aed;
+	cursor: pointer;
+}
+
+#viewer a.wiki-link:hover {
+	border-bottom-color: #7c3aed;
+}
+
+#viewer a.wiki-link.broken {
+	color: #999;
+	border-bottom: 1px dashed #ccc;
+	cursor: default;
+}
+
 /* Bold & italic */
 
 #viewer strong {
@@ -85,6 +100,10 @@
 }
 
 /* Checkboxes (task lists) */
+
+#viewer li:has(input[type="checkbox"]) {
+	list-style: none;
+}
 
 #viewer li input[type="checkbox"] {
 	display: inline-block;
