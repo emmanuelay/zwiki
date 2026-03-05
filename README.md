@@ -21,7 +21,7 @@ Use it to navigate documentation in a software project or maintain a personal kn
 
 ### Prerequisites
 
-- Go 1.21+
+- Go 1.26+
 - [Air](https://github.com/air-verse/air) (optional, for hot reload during development)
 
 ### Build and run
