@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/adrg/frontmatter"
@@ -99,7 +100,64 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 		folder.Nodes = append(folder.Nodes, node)
 	}
 
+	sortFolder(&root)
+
 	return root, nil
+}
+
+func sortFolder(f *models.Folder) {
+	sort.Slice(f.Nodes, func(i, j int) bool {
+		return naturalLess(f.Nodes[i].Title, f.Nodes[j].Title)
+	})
+	sort.Slice(f.Folders, func(i, j int) bool {
+		return naturalLess(f.Folders[i].Name, f.Folders[j].Name)
+	})
+	for idx := range f.Folders {
+		sortFolder(&f.Folders[idx])
+	}
+}
+
+func naturalLess(a, b string) bool {
+	a = strings.ToLower(a)
+	b = strings.ToLower(b)
+
+	for len(a) > 0 && len(b) > 0 {
+		aDigit := a[0] >= '0' && a[0] <= '9'
+		bDigit := b[0] >= '0' && b[0] <= '9'
+
+		if aDigit && bDigit {
+			// Extract numeric parts
+			aNum, aRest := extractNumber(a)
+			bNum, bRest := extractNumber(b)
+			if aNum != bNum {
+				return aNum < bNum
+			}
+			a = aRest
+			b = bRest
+		} else if aDigit != bDigit {
+			return aDigit
+		} else {
+			if a[0] != b[0] {
+				return a[0] < b[0]
+			}
+			a = a[1:]
+			b = b[1:]
+		}
+	}
+
+	return len(a) < len(b)
+}
+
+func extractNumber(s string) (int, string) {
+	i := 0
+	for i < len(s) && s[i] >= '0' && s[i] <= '9' {
+		i++
+	}
+	n := 0
+	for _, c := range s[:i] {
+		n = n*10 + int(c-'0')
+	}
+	return n, s[i:]
 }
 
 func (repo *fileSystemRepository) GetNode(ctx context.Context, path string) (models.Node, error) {

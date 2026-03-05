@@ -1,11 +1,11 @@
 root = "."
 
 [build]
-  cmd = "go build -o ./tmp/zwiki ./cmd/zwiki"
-  bin = "./tmp/zwiki"
+  cmd = "go build -o ./zwiki ./cmd/zwiki"
+  bin = "./zwiki"
   args_bin = ["-path", "./tests", "-port", "1337"]
   include_ext = ["go", "html", "css", "js"]
-  exclude_dir = ["tmp", "tests", ".git"]
+  exclude_dir = [".git"]
   delay = 500
 
 [log]

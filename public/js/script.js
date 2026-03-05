@@ -149,7 +149,7 @@ function renderTreeElement(rootElement, rootFolder) {
 }
 
 async function loadNode(path) {
-	const response = await fetch('/api/get?node=' + path);
+	const response = await fetch('/api/get?node=' + encodeURIComponent(path));
 	if (!response.ok) {
 		const message = `An error has occured: ${response.status}`;
 		throw new Error(message);
@@ -195,6 +195,9 @@ async function loadNode(path) {
 				e.preventDefault();
 				loadNode(href);
 			});
+		} else if (href && (href.startsWith("http://") || href.startsWith("https://"))) {
+			a.setAttribute("target", "_blank");
+			a.setAttribute("rel", "noopener noreferrer");
 		}
 	});
 }
