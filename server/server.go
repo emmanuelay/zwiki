@@ -39,8 +39,8 @@ func (api *Api) Serve() {
 
 	r.Route("/api", func(apiRouter chi.Router) {
 		apiRouter.Get("/all", api.GetAll)
-		apiRouter.Get("/get/{node}", api.GetNode)
-		apiRouter.Put("/update/{node}", api.UpdateNode)
+		apiRouter.Get("/get", api.GetNode)
+		apiRouter.Put("/update", api.UpdateNode)
 		apiRouter.Post("/create", api.CreateNode)
 		apiRouter.Delete("/delete", api.DeleteNode)
 	})

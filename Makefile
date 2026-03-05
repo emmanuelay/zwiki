@@ -9,3 +9,5 @@ run: build
 clean:
 	go clean
 	rm ${BINARY_NAME}-darwin
+
+restart: build run

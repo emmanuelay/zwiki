@@ -1,0 +1,15 @@
+root = "."
+
+[build]
+  cmd = "go build -o ./tmp/zwiki ./cmd/zwiki"
+  bin = "./tmp/zwiki"
+  args_bin = ["-path", "./tests", "-port", "1337"]
+  include_ext = ["go", "html", "css", "js"]
+  exclude_dir = ["tmp", "tests", ".git"]
+  delay = 500
+
+[log]
+  time = false
+
+[misc]
+  clean_on_exit = true

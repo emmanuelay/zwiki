@@ -25,6 +25,23 @@
 	font-weight: 700;
 }
 
+#content-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin-top: 0.6rem;
+}
+
+#content-tags span {
+	display: inline-block;
+	font-size: 1.1rem;
+	font-weight: 500;
+	padding: 0.3rem 1rem;
+	background-color: #e8e8e8;
+	color: #555;
+	border-radius: 2rem;
+}
+
 #content .header button {
 	text-transform: uppercase;
 	font-size: 1.3rem;
@@ -40,19 +57,3 @@
 	color: #fff;
 }
 
-#content .viewer {
-	flex: 1 1 auto;
-	padding: 6rem 10rem 4rem 10rem;
-}
-
-#content .viewer h1 {
-	font-size: 3rem;
-	margin-bottom: 4rem;
-	color: #555;
-}
-
-#content .viewer p {
-	font-size: 1.5rem;
-	line-height: 2.5rem;
-	margin-bottom: 1.5rem;
-}

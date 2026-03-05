@@ -1,0 +1,182 @@
+#viewer {
+	flex: 1 1 auto;
+	padding: clamp(1.5rem, 4vw, 4rem) clamp(1.5rem, 8vw, 8rem);
+	font-size: 1.6rem;
+	line-height: 1.8;
+	color: #2c2c2c;
+	overflow-y: auto;
+}
+
+/* Headings */
+
+#viewer h1,
+#viewer h2,
+#viewer h3,
+#viewer h4,
+#viewer h5,
+#viewer h6 {
+	color: #1a1a1a;
+	font-weight: 600;
+	line-height: 1.3;
+	margin-top: 2.4rem;
+	margin-bottom: 1.2rem;
+}
+
+#viewer h1 { font-size: 3.2rem; margin-top: 0; padding-bottom: 0.8rem; border-bottom: 1px solid #e5e5e5; }
+#viewer h2 { font-size: 2.4rem; padding-bottom: 0.6rem; border-bottom: 1px solid #eee; }
+#viewer h3 { font-size: 2rem; }
+#viewer h4 { font-size: 1.8rem; }
+#viewer h5 { font-size: 1.6rem; }
+#viewer h6 { font-size: 1.4rem; color: #666; }
+
+/* Paragraphs */
+
+#viewer p {
+	font-size: 1.6rem;
+	line-height: 1.8;
+	margin-bottom: 1.6rem;
+	color: #2c2c2c;
+}
+
+/* Links */
+
+#viewer a {
+	color: #2563eb;
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	transition: border-color 0.15s ease;
+}
+
+#viewer a:hover {
+	border-bottom-color: #2563eb;
+}
+
+/* Bold & italic */
+
+#viewer strong {
+	font-weight: 700;
+	color: #1a1a1a;
+}
+
+#viewer em {
+	font-style: italic;
+}
+
+/* Lists */
+
+#viewer ul,
+#viewer ol {
+	margin-bottom: 1.6rem;
+	padding-left: 2.4rem;
+}
+
+#viewer ul { list-style-type: disc; }
+#viewer ol { list-style-type: decimal; }
+
+#viewer li {
+	margin-bottom: 0.4rem;
+	line-height: 1.7;
+}
+
+#viewer li > ul,
+#viewer li > ol {
+	margin-top: 0.4rem;
+	margin-bottom: 0;
+}
+
+/* Checkboxes (task lists) */
+
+#viewer li input[type="checkbox"] {
+	display: inline-block;
+	margin-right: 0.6rem;
+	vertical-align: middle;
+}
+
+/* Blockquotes */
+
+#viewer blockquote {
+	margin: 1.6rem 0;
+	padding: 1.2rem 2rem;
+	border-left: 4px solid #d1d5db;
+	background: #f9fafb;
+	color: #555;
+	font-style: italic;
+}
+
+#viewer blockquote p {
+	margin-bottom: 0;
+}
+
+/* Code - inline */
+
+#viewer code {
+	font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', 'Courier New', monospace;
+	font-size: 1.4rem;
+	background: #f3f4f6;
+	color: #d946a8;
+	padding: 0.2rem 0.5rem;
+	border-radius: 4px;
+}
+
+/* Code - blocks */
+
+#viewer pre {
+	margin: 1.6rem 0;
+	padding: 1.8rem 2rem;
+	background: #1e1e2e;
+	color: #cdd6f4;
+	border-radius: 8px;
+	overflow-x: auto;
+	line-height: 1.6;
+}
+
+#viewer pre code {
+	background: none;
+	color: inherit;
+	padding: 0;
+	border-radius: 0;
+	font-size: 1.4rem;
+}
+
+/* Horizontal rules */
+
+#viewer hr {
+	border: none;
+	border-top: 1px solid #e5e5e5;
+	margin: 2.4rem 0;
+}
+
+/* Tables */
+
+#viewer table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1.6rem 0;
+	font-size: 1.5rem;
+}
+
+#viewer th,
+#viewer td {
+	padding: 1rem 1.4rem;
+	border: 1px solid #e5e7eb;
+	text-align: left;
+}
+
+#viewer th {
+	background: #f9fafb;
+	font-weight: 600;
+	color: #374151;
+}
+
+#viewer tr:nth-child(even) {
+	background: #fafafa;
+}
+
+/* Images */
+
+#viewer img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+	margin: 1.6rem 0;
+}

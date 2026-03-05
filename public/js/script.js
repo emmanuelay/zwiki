@@ -105,6 +105,24 @@ async function loadNode(path) {
 	const node = await response.json();
 	console.log("loadNode - fetched", node);
 
-	let content = document.getElementById("viewer")
-	content.innerText = node.data.content;
+	// Update title
+	const titleEl = document.getElementById("content-title");
+	const filename = path.split("/").pop().replace(/\.md$/, "");
+	titleEl.innerText = (node.data.meta && node.data.meta.title) || filename;
+
+	// Update tags
+	const tagsEl = document.getElementById("content-tags");
+	tagsEl.innerHTML = "";
+	if (node.data.meta && node.data.meta.tags) {
+		const tags = node.data.meta.tags.split(",");
+		for (const tag of tags) {
+			const span = document.createElement("span");
+			span.innerText = tag.trim();
+			tagsEl.appendChild(span);
+		}
+	}
+
+	// Render markdown content
+	const viewer = document.getElementById("viewer");
+	viewer.innerHTML = marked.parse(node.data.content);
 }

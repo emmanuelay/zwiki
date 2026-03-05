@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zwiki</title>
     <link rel="stylesheet" href="/css/styles.css" />
+    <script src="/js/marked.min.js"></script>
     <script src="/js/script.js"></script>
   </head>
   <body>
@@ -64,7 +65,14 @@
 
       <div id="content">
         <div class="header">
-          <h1>Content title</h1>
+          <div class="title">
+          	<h1 id="content-title">Content title</h1>
+			<div id="content-tags">
+				<span>Tag 1</span>
+				<span>Tag 2</span>
+				<span>Tag 3</span>
+			</div>
+		  </div>
           <button>Edit</button>
         </div>
         <div id="viewer" class="viewer">
