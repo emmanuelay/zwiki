@@ -179,7 +179,7 @@ function setupWikiLinks() {
 			return `<a class="wiki-link broken">${token.text}</a>`;
 		}
 	};
-	marked.use({ extensions: [wikiLink] });
+	marked.use({ breaks: true, extensions: [wikiLink] });
 }
 
 async function refreshTree() {
