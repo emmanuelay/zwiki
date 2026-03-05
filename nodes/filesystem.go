@@ -261,7 +261,32 @@ func (repo *fileSystemRepository) CreateNode(ctx context.Context, path string, n
 }
 
 func (repo *fileSystemRepository) UpdateNode(ctx context.Context, path string, node models.Node) error {
-	return errors.New("not implemented")
+	fullPath := filepath.Join(repo.root, path)
+	absolutePath, err := filepath.Abs(fullPath)
+	if err != nil {
+		return fmt.Errorf("failed building path: %w", err)
+	}
+
+	// Preserve existing frontmatter
+	existing, err := os.ReadFile(absolutePath)
+	if err != nil {
+		return fmt.Errorf("failed reading file: %w", err)
+	}
+
+	var content string
+	raw := string(existing)
+	if strings.HasPrefix(raw, "---\n") {
+		if end := strings.Index(raw[4:], "\n---"); end != -1 {
+			frontmatterBlock := raw[:4+end+4]
+			content = frontmatterBlock + "\n" + node.Content + "\n"
+		} else {
+			content = node.Content + "\n"
+		}
+	} else {
+		content = node.Content + "\n"
+	}
+
+	return os.WriteFile(absolutePath, []byte(content), 0644)
 }
 
 func (repo *fileSystemRepository) DeleteNode(ctx context.Context, path string, node models.Node) error {

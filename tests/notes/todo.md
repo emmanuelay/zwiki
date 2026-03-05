@@ -3,7 +3,6 @@ title: Todo
 tags: tasks, planning
 priority: high
 ---
-
 # Todo
 
 - [x] Set up project structure
@@ -12,3 +11,4 @@ priority: high
 - [ ] Add frontmatter parsing
 - [ ] Implement create/update/delete
 - [ ] Add search functionality
+- [ ] Add something else

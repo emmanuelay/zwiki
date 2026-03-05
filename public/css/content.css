@@ -42,6 +42,11 @@
 	border-radius: 2rem;
 }
 
+#content .header .actions {
+	display: flex;
+	gap: 0.8rem;
+}
+
 #content .header button {
 	text-transform: uppercase;
 	font-size: 1.3rem;
@@ -55,5 +60,16 @@
 #content .header button:hover {
 	background-color: #333;
 	color: #fff;
+}
+
+#content .header button:disabled {
+	background-color: #e8e8e8;
+	color: #aaa;
+	cursor: default;
+}
+
+#content .header button:disabled:hover {
+	background-color: #e8e8e8;
+	color: #aaa;
 }
 

@@ -2,8 +2,16 @@ document.addEventListener('DOMContentLoaded', onLoad);
 
 // Flat index of all nodes for wiki-link resolution
 let nodeIndex = [];
+let currentContent = "";
+let savedContent = "";
+let currentPath = "";
+let editing = false;
 
 function onLoad(event) {
+	document.getElementById("btn-edit").addEventListener("click", toggleEditor);
+	document.getElementById("btn-save").addEventListener("click", saveNode);
+	document.getElementById("editor").addEventListener("input", onEditorInput);
+
 	fetchTree()
 		.then(tree => {
 			nodeIndex = flattenNodes(tree);
@@ -15,11 +23,57 @@ function onLoad(event) {
 		});
 }
 
-function toggleEditor(event) {
-	const viewer = document.getElementById("node");
+function onEditorInput() {
+	const btn = document.getElementById("btn-save");
+	const hasChanges = document.getElementById("editor").value !== savedContent;
+	btn.disabled = !hasChanges;
+}
+
+function toggleEditor() {
+	const viewer = document.getElementById("viewer");
 	const editor = document.getElementById("editor");
-	editor.classList.toggle("hidden");
-	viewer.classList.toggle("hidden");
+	const btnEdit = document.getElementById("btn-edit");
+	const btnSave = document.getElementById("btn-save");
+
+	editing = !editing;
+
+	if (editing) {
+		editor.value = currentContent;
+		viewer.classList.add("hidden");
+		editor.classList.remove("hidden");
+		btnSave.classList.remove("hidden");
+		btnSave.disabled = true;
+		btnEdit.innerText = "View";
+		editor.focus();
+	} else {
+		currentContent = editor.value;
+		viewer.innerHTML = marked.parse(currentContent);
+		attachLinkHandlers();
+		editor.classList.add("hidden");
+		btnSave.classList.add("hidden");
+		viewer.classList.remove("hidden");
+		btnEdit.innerText = "Edit";
+	}
+}
+
+async function saveNode() {
+	const editor = document.getElementById("editor");
+	const content = editor.value;
+
+	const response = await fetch('/api/update?node=' + encodeURIComponent(currentPath), {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ content: content })
+	});
+
+	if (!response.ok) {
+		console.log("save failed", response.status);
+		return;
+	}
+
+	savedContent = content;
+	currentContent = content;
+	document.getElementById("btn-save").disabled = true;
 }
 
 async function fetchTree() {
@@ -174,11 +228,26 @@ async function loadNode(path) {
 		}
 	}
 
-	// Render markdown content
+	// Store raw content and render
+	currentPath = path;
+	currentContent = node.data.content;
+	savedContent = node.data.content;
 	const viewer = document.getElementById("viewer");
-	viewer.innerHTML = marked.parse(node.data.content);
+	const editor = document.getElementById("editor");
 
-	// Attach click handlers for internal links
+	// Reset to viewer mode
+	editing = false;
+	viewer.innerHTML = marked.parse(currentContent);
+	viewer.classList.remove("hidden");
+	editor.classList.add("hidden");
+	document.getElementById("btn-edit").innerText = "Edit";
+	document.getElementById("btn-save").classList.add("hidden");
+
+	attachLinkHandlers();
+}
+
+function attachLinkHandlers() {
+	const viewer = document.getElementById("viewer");
 	viewer.querySelectorAll("a").forEach(a => {
 		const wikiPath = a.getAttribute("data-path");
 		if (wikiPath) {

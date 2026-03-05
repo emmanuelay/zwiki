@@ -1,21 +1,18 @@
-#content .editor {
-	flex: 1 1 auto;
-	display: flex;
-	flex-flow: column nowrap;
-}
-
-#content #editor {
+#editor {
 	flex: 1 1 auto;
 	border: 0;
-	padding: 6rem 10rem 4rem 10rem;
-	font-size: 2rem;
-	font-family: 'Courier New', Courier, monospace;
-	font-weight: 500;
-	color: #222;
-	caret-color: red;
+	padding: clamp(1.5rem, 4vw, 4rem) clamp(1.5rem, 8vw, 8rem);
+	font-size: 1.5rem;
+	line-height: 1.8;
+	font-family: 'Roboto Mono', monospace;
+	font-weight: 400;
+	color: #000;
+	background-color: #fefefe;
+	caret-color: #2563eb;
 	resize: none;
+	outline: none;
 }
 
-#content .hidden {
-	display: none;
+.hidden {
+	display: none !important;
 }
