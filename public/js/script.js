@@ -24,9 +24,11 @@ function onLoad(event) {
 }
 
 function onEditorInput() {
-	const btn = document.getElementById("btn-save");
-	const hasChanges = document.getElementById("editor").value !== savedContent;
-	btn.disabled = !hasChanges;
+	const editor = document.getElementById("editor");
+	const hasChanges = editor.value !== savedContent;
+	document.getElementById("btn-save").disabled = !hasChanges;
+	document.getElementById("btn-edit").innerText = hasChanges ? "Cancel" : "View";
+	updateOutline(editor.value);
 }
 
 function toggleEditor() {
@@ -46,9 +48,10 @@ function toggleEditor() {
 		btnEdit.innerText = "View";
 		editor.focus();
 	} else {
-		currentContent = editor.value;
+		currentContent = savedContent;
 		viewer.innerHTML = marked.parse(currentContent);
 		attachLinkHandlers();
+		updateOutline(currentContent);
 		editor.classList.add("hidden");
 		btnSave.classList.add("hidden");
 		viewer.classList.remove("hidden");
@@ -244,6 +247,83 @@ async function loadNode(path) {
 	document.getElementById("btn-save").classList.add("hidden");
 
 	attachLinkHandlers();
+	updateOutline(currentContent);
+}
+
+function updateOutline(markdown) {
+	const container = document.getElementById("outline");
+	container.innerHTML = "";
+
+	const outline = parseOutlineFromMarkdown(markdown);
+	if (outline.length === 0) {
+		return;
+	}
+
+	const title = document.createElement("div");
+	title.className = "outline-title";
+	title.innerText = "Outline";
+	container.appendChild(title);
+
+	container.appendChild(buildOutlineList(outline));
+}
+
+function parseOutlineFromMarkdown(markdown) {
+	const flat = [];
+	const lines = markdown.split("\n");
+
+	for (const line of lines) {
+		const match = line.match(/^(#{1,6})\s+(.+)/);
+		if (!match) continue;
+		flat.push({
+			level: match[1].length,
+			text: match[2].trim(),
+			children: []
+		});
+	}
+
+	// Build nested tree
+	const root = [];
+	const stack = [];
+
+	for (const entry of flat) {
+		while (stack.length > 0 && stack[stack.length - 1].level >= entry.level) {
+			stack.pop();
+		}
+		if (stack.length === 0) {
+			root.push(entry);
+			stack.push(entry);
+		} else {
+			stack[stack.length - 1].children.push(entry);
+			stack.push(entry);
+		}
+	}
+
+	return root;
+}
+
+function buildOutlineList(entries) {
+	const ul = document.createElement("ul");
+	for (const entry of entries) {
+		const li = document.createElement("li");
+		const a = document.createElement("a");
+		a.innerText = entry.text;
+		a.addEventListener("click", () => {
+			const viewer = document.getElementById("viewer");
+			const headings = viewer.querySelectorAll("h1, h2, h3, h4, h5, h6");
+			for (const h of headings) {
+				if (h.textContent === entry.text) {
+					h.scrollIntoView({ behavior: "smooth" });
+					break;
+				}
+			}
+		});
+		li.appendChild(a);
+		if (entry.children && entry.children.length > 0) {
+			li.appendChild(buildOutlineList(entry.children));
+		}
+		ul.appendChild(li);
+	}
+	return ul;
 }
 
 function attachLinkHandlers() {

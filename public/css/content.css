@@ -73,3 +73,50 @@
 	color: #aaa;
 }
 
+#content-body {
+	display: flex;
+	flex: 1 1 auto;
+	overflow: hidden;
+}
+
+#outline {
+	flex: 0 0 22rem;
+	padding: 2.4rem 2rem;
+	border-left: 1px solid #eee;
+	overflow-y: auto;
+	font-size: 1.2rem;
+	color: #666;
+}
+
+#outline .outline-title {
+	text-transform: uppercase;
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: #999;
+	margin-bottom: 1.2rem;
+}
+
+#outline ul {
+	list-style: none;
+	padding-left: 1.4rem;
+}
+
+#outline > ul {
+	padding-left: 0;
+}
+
+#outline li {
+	margin-bottom: 0.4rem;
+	line-height: 1.6;
+}
+
+#outline a {
+	color: #666;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+#outline a:hover {
+	color: #1a1a1a;
+}
+

@@ -28,7 +28,9 @@ html {
 
 #content {
 	flex: 1 1 auto;
-	overflow: hidden auto;
+	overflow: hidden;
+	display: flex;
+	flex-flow: column nowrap;
 }
 
 .header {

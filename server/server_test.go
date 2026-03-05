@@ -63,7 +63,7 @@ func TestGetNode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedBody := "# Welcome to the Wiki\n\nThis is the main entry point. From here you can navigate to different topics using the sidebar.\n\n## Getting Started\n\n- Browse the table of contents on the left\n- Click on any note to view its content\n- Use the edit button to make changes"
+	expectedBody := "# Welcome to the Wiki\n\nThis is the main entry point. From here you can navigate to different topics using the sidebar.\n\n## Getting Started\n\n- Browse the table of contents on the left\n- Click on any note to view its content\n- Use the edit button to make changes\n\n## Quick Links\n\n- Check out the [[todo]] for what's next\n- Browse [[Code Snippets]] for useful examples\n- Read about [[Go Patterns]] for architecture guidance"
 	if !strings.EqualFold(response.Data.Content, expectedBody) {
 		t.Errorf("Expected '%s', got '%s'", expectedBody, response.Data.Content)
 	}
