@@ -15,6 +15,7 @@ function onLoad(event) {
 	document.getElementById("btn-darkmode").addEventListener("click", toggleDarkMode);
 	document.getElementById("btn-frontmatter").addEventListener("click", toggleFrontmatter);
 	document.getElementById("btn-add-field").addEventListener("click", () => addFrontmatterRow("", ""));
+	initResizeHandle();
 
 	// Restore dark mode preference
 	if (localStorage.getItem("darkMode") === "true") {
@@ -556,6 +557,32 @@ function collectFrontmatter() {
 		if (key) meta[key] = value;
 	}
 	return meta;
+}
+
+function initResizeHandle() {
+	const handle = document.getElementById("resize-handle");
+	const toc = document.getElementById("toc");
+	let dragging = false;
+
+	handle.addEventListener("mousedown", (e) => {
+		e.preventDefault();
+		dragging = true;
+		document.body.style.cursor = "col-resize";
+		document.body.style.userSelect = "none";
+	});
+
+	document.addEventListener("mousemove", (e) => {
+		if (!dragging) return;
+		const width = Math.max(150, Math.min(e.clientX, 600));
+		toc.style.width = width + "px";
+	});
+
+	document.addEventListener("mouseup", () => {
+		if (!dragging) return;
+		dragging = false;
+		document.body.style.cursor = "";
+		document.body.style.userSelect = "";
+	});
 }
 
 function toggleDarkMode() {
