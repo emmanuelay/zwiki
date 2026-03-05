@@ -51,12 +51,17 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 		if filepath.Ext(d.Name()) == ".md" && !d.IsDir() {
 			title := strings.TrimSuffix(filepath.Base(path), ".md")
 
-			// Read frontmatter title if available
+			// Read frontmatter if available
+			var meta map[string]string
 			if data, readErr := os.ReadFile(path); readErr == nil {
 				var matter map[string]any
 				if _, parseErr := frontmatter.Parse(bytes.NewReader(data), &matter); parseErr == nil {
 					if fmTitle, ok := matter["title"].(string); ok && fmTitle != "" {
 						title = fmTitle
+					}
+					meta = make(map[string]string)
+					for k, v := range matter {
+						meta[k] = fmt.Sprintf("%v", v)
 					}
 				}
 			}
@@ -66,6 +71,7 @@ func (repo *fileSystemRepository) GetAll(ctx context.Context) (models.Folder, er
 				Path:  strings.ReplaceAll(path, absoluteRoot, ""),
 				Title: title,
 				Slug:  models.Slug(strings.ReplaceAll(d.Name(), ".md", "")),
+				Meta:  meta,
 			}
 			if fi, err := d.Info(); err == nil {
 				node.ModTime = fi.ModTime().Unix()

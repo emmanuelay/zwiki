@@ -40,6 +40,13 @@
 	background-color: #e8e8e8;
 	color: #555;
 	border-radius: 2rem;
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#content-tags span:hover {
+	background-color: #7c3aed;
+	color: #fff;
 }
 
 #content .header .actions {

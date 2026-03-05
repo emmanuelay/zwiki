@@ -220,16 +220,7 @@ async function loadNode(path) {
 	titleEl.innerText = (node.data.meta && node.data.meta.title) || filename;
 
 	// Update tags
-	const tagsEl = document.getElementById("content-tags");
-	tagsEl.innerHTML = "";
-	if (node.data.meta && node.data.meta.tags) {
-		const tags = node.data.meta.tags.split(",");
-		for (const tag of tags) {
-			const span = document.createElement("span");
-			span.innerText = tag.trim();
-			tagsEl.appendChild(span);
-		}
-	}
+	renderTags(node.data.meta);
 
 	// Store raw content and render
 	currentPath = path;
@@ -324,6 +315,80 @@ function buildOutlineList(entries) {
 		ul.appendChild(li);
 	}
 	return ul;
+}
+
+function renderTags(meta) {
+	const tagsEl = document.getElementById("content-tags");
+	tagsEl.innerHTML = "";
+	if (!meta || !meta.tags) return;
+
+	const tags = meta.tags.split(",");
+	for (const tag of tags) {
+		const trimmed = tag.trim();
+		const span = document.createElement("span");
+		span.innerText = trimmed;
+		span.addEventListener("click", () => searchByTag(trimmed));
+		tagsEl.appendChild(span);
+	}
+}
+
+function searchByTag(tag) {
+	const lower = tag.toLowerCase();
+	const matches = nodeIndex.filter(node => {
+		if (!node.meta || !node.meta.tags) return false;
+		const tags = node.meta.tags.split(",").map(t => t.trim().toLowerCase());
+		return tags.includes(lower);
+	});
+
+	// Update header
+	document.getElementById("content-title").innerText = "Tag: " + tag;
+	const tagsEl = document.getElementById("content-tags");
+	tagsEl.innerHTML = "";
+
+	// Hide editor, outline, show viewer
+	const viewer = document.getElementById("viewer");
+	const editor = document.getElementById("editor");
+	editing = false;
+	editor.classList.add("hidden");
+	viewer.classList.remove("hidden");
+	document.getElementById("btn-edit").innerText = "Edit";
+	document.getElementById("btn-save").classList.add("hidden");
+	document.getElementById("outline").innerHTML = "";
+
+	// Render results
+	viewer.innerHTML = "";
+
+	if (matches.length === 0) {
+		viewer.innerHTML = "<p>No documents found with this tag.</p>";
+		return;
+	}
+
+	const heading = document.createElement("h1");
+	heading.innerText = matches.length + " document" + (matches.length !== 1 ? "s" : "") + " tagged \"" + tag + "\"";
+	viewer.appendChild(heading);
+
+	const list = document.createElement("ul");
+	for (const node of matches) {
+		const li = document.createElement("li");
+		const a = document.createElement("a");
+		a.innerText = node.title;
+		a.href = "#";
+		a.addEventListener("click", e => {
+			e.preventDefault();
+			loadNode(node.path);
+		});
+		li.appendChild(a);
+
+		if (node.meta && node.meta.tags) {
+			const tagList = document.createElement("span");
+			tagList.className = "search-result-tags";
+			tagList.innerText = node.meta.tags;
+			li.appendChild(tagList);
+		}
+
+		list.appendChild(li);
+	}
+	viewer.appendChild(list);
 }
 
 function attachLinkHandlers() {
