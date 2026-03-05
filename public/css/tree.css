@@ -8,8 +8,7 @@
 	outline: 0;
 	text-decoration: none;
 	text-align: left;
-	text-align-last: left;
-	font-size: 1.5rem;
+	font-size: 0.8rem;
 }
 
 .tree ul:before,
@@ -18,11 +17,11 @@
 	position: absolute;
 	right: auto;
 	content: '';
-	--webkit-user-select: none;
+	user-select: none;
 }
 
 .tree {
-	padding: 2rem;
+	padding: 1rem;
 }
 
 .tree,
@@ -34,7 +33,7 @@
 .tree ul,
 .tree li {
 	position: relative;
-	padding: 0 0 5px;
+	padding: 0 0 3px;
 }
 
 .tree ul:before,
@@ -50,7 +49,7 @@
 }
 
 .tree li {
-	padding: 0 0 0 2rem;
+	padding: 0 0 0 1.2rem;
 }
 
 .tree li label {
@@ -73,12 +72,10 @@
 .tree li:before {
 	content: "";
 	background: transparent 0 2px repeat-x url('data:image/gif;base64,R0lGODlhAQABAPAAAKampgAAACwAAAAAAQABAAACAkQBADs=');
-	width: 15px;
-	top: 7px;
+	width: 10px;
+	top: 5px;
 	left: 0;
-	text-align-last: right;
-	text-align: right;
-	height: 5px;
+	height: 3px;
 }
 
 .tree li:after {
@@ -90,7 +87,7 @@
 }
 
 .tree li:last-child:after {
-	height: 9px
+	height: 7px;
 }
 
 /* Folder, closed */
@@ -99,9 +96,9 @@
 	width: 100%;
 	background-image: url(/img/folder.closed.svg);
 	background-repeat: no-repeat;
-	background-size: 1rem 1rem;
+	background-size: 0.75rem 0.75rem;
 	background-position: left center;
-	padding-left: 1.8rem;
+	padding-left: 1.2rem;
 	color: #555;
 }
 
@@ -113,9 +110,9 @@
 .tree input[type="checkbox"]:checked~label {
 	background-image: url(/img/folder.open.svg);
 	background-repeat: no-repeat;
-	background-size: 1rem 1rem;
+	background-size: 0.75rem 0.75rem;
 	background-position: left center;
-	padding-left: 1.8rem;
+	padding-left: 1.2rem;
 }
 
 /* Document */
@@ -124,13 +121,48 @@
 	width: 100%;
 	background-image: url(/img/document.svg);
 	background-repeat: no-repeat;
-	background-size: 1.3rem 1.3rem;
+	background-size: 0.8rem 0.8rem;
 	background-position: left center;
-	padding-left: 2rem;
+	padding-left: 1.2rem;
 	cursor: pointer;
 	color: #888;
 }
 
 .tree li span:hover {
 	color: #000;
+}
+
+/* Dark mode */
+
+:root.dark .tree ul:before,
+:root.dark .tree li:after {
+	background: #4b5563;
+}
+
+:root.dark .tree input[type="checkbox"]~label {
+	color: #9ca3af;
+}
+
+:root.dark .tree input[type="checkbox"]~label:hover {
+	color: #e5e7eb;
+}
+
+:root.dark .tree li span {
+	color: #6b7280;
+}
+
+:root.dark .tree li span:hover {
+	color: #e5e7eb;
+}
+
+:root.dark #outline .outline-title {
+	color: #6b7280;
+}
+
+:root.dark #outline a {
+	color: #9ca3af;
+}
+
+:root.dark #outline a:hover {
+	color: #e5e7eb;
 }

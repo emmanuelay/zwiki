@@ -5,12 +5,21 @@ let nodeIndex = [];
 let currentContent = "";
 let savedContent = "";
 let currentPath = "";
+let currentMeta = null;
 let editing = false;
 
 function onLoad(event) {
 	document.getElementById("btn-edit").addEventListener("click", toggleEditor);
 	document.getElementById("btn-save").addEventListener("click", saveNode);
 	document.getElementById("editor").addEventListener("input", onEditorInput);
+	document.getElementById("btn-darkmode").addEventListener("click", toggleDarkMode);
+
+	// Restore dark mode preference
+	if (localStorage.getItem("darkMode") === "true") {
+		document.documentElement.classList.add("dark");
+		document.getElementById("icon-sun").classList.remove("hidden");
+		document.getElementById("icon-moon").classList.add("hidden");
+	}
 
 	fetchTree()
 		.then(tree => {
@@ -28,6 +37,7 @@ function onEditorInput() {
 	const hasChanges = editor.value !== savedContent;
 	document.getElementById("btn-save").disabled = !hasChanges;
 	document.getElementById("btn-edit").innerText = hasChanges ? "Cancel" : "View";
+	styleEditButton(hasChanges ? "cancel" : "view");
 	updateOutline(editor.value);
 }
 
@@ -46,16 +56,22 @@ function toggleEditor() {
 		btnSave.classList.remove("hidden");
 		btnSave.disabled = true;
 		btnEdit.innerText = "View";
+		styleEditButton("view");
 		editor.focus();
 	} else {
 		currentContent = savedContent;
-		viewer.innerHTML = marked.parse(currentContent);
+		viewer.innerHTML = "";
+		renderTags(viewer, currentMeta);
+		const article = document.createElement("div");
+		article.innerHTML = marked.parse(currentContent);
+		viewer.appendChild(article);
 		attachLinkHandlers();
 		updateOutline(currentContent);
 		editor.classList.add("hidden");
 		btnSave.classList.add("hidden");
 		viewer.classList.remove("hidden");
 		btnEdit.innerText = "Edit";
+		styleEditButton("edit");
 	}
 }
 
@@ -219,22 +235,25 @@ async function loadNode(path) {
 	const filename = path.split("/").pop().replace(/\.md$/, "");
 	titleEl.innerText = (node.data.meta && node.data.meta.title) || filename;
 
-	// Update tags
-	renderTags(node.data.meta);
-
 	// Store raw content and render
 	currentPath = path;
 	currentContent = node.data.content;
 	savedContent = node.data.content;
+	currentMeta = node.data.meta;
 	const viewer = document.getElementById("viewer");
 	const editor = document.getElementById("editor");
 
 	// Reset to viewer mode
 	editing = false;
-	viewer.innerHTML = marked.parse(currentContent);
+	viewer.innerHTML = "";
+	renderTags(viewer, node.data.meta);
+	const article = document.createElement("div");
+	article.innerHTML = marked.parse(currentContent);
+	viewer.appendChild(article);
 	viewer.classList.remove("hidden");
 	editor.classList.add("hidden");
 	document.getElementById("btn-edit").innerText = "Edit";
+	styleEditButton("edit");
 	document.getElementById("btn-save").classList.add("hidden");
 
 	attachLinkHandlers();
@@ -317,10 +336,12 @@ function buildOutlineList(entries) {
 	return ul;
 }
 
-function renderTags(meta) {
-	const tagsEl = document.getElementById("content-tags");
-	tagsEl.innerHTML = "";
+function renderTags(container, meta) {
 	if (!meta || !meta.tags) return;
+
+	const tagsEl = document.createElement("div");
+	tagsEl.id = "content-tags";
+	tagsEl.className = "flex flex-wrap gap-1.5 mb-4";
 
 	const tags = meta.tags.split(",");
 	for (const tag of tags) {
@@ -330,6 +351,8 @@ function renderTags(meta) {
 		span.addEventListener("click", () => searchByTag(trimmed));
 		tagsEl.appendChild(span);
 	}
+
+	container.appendChild(tagsEl);
 }
 
 function searchByTag(tag) {
@@ -342,8 +365,6 @@ function searchByTag(tag) {
 
 	// Update header
 	document.getElementById("content-title").innerText = "Tag: " + tag;
-	const tagsEl = document.getElementById("content-tags");
-	tagsEl.innerHTML = "";
 
 	// Hide editor, outline, show viewer
 	const viewer = document.getElementById("viewer");
@@ -352,6 +373,7 @@ function searchByTag(tag) {
 	editor.classList.add("hidden");
 	viewer.classList.remove("hidden");
 	document.getElementById("btn-edit").innerText = "Edit";
+	styleEditButton("edit");
 	document.getElementById("btn-save").classList.add("hidden");
 	document.getElementById("outline").innerHTML = "";
 
@@ -389,6 +411,25 @@ function searchByTag(tag) {
 		list.appendChild(li);
 	}
 	viewer.appendChild(list);
+}
+
+function styleEditButton(mode) {
+	const btn = document.getElementById("btn-edit");
+	btn.classList.remove("bg-blue-600", "hover:bg-blue-700", "text-white", "bg-red-600", "hover:bg-red-700");
+	if (mode === "edit") {
+		btn.classList.add("bg-blue-600", "hover:bg-blue-700", "text-white");
+	} else if (mode === "cancel") {
+		btn.classList.add("bg-red-600", "hover:bg-red-700", "text-white");
+	} else {
+		btn.classList.add("bg-blue-600", "hover:bg-blue-700", "text-white");
+	}
+}
+
+function toggleDarkMode() {
+	const isDark = document.documentElement.classList.toggle("dark");
+	localStorage.setItem("darkMode", isDark);
+	document.getElementById("icon-sun").classList.toggle("hidden", !isDark);
+	document.getElementById("icon-moon").classList.toggle("hidden", isDark);
 }
 
 function attachLinkHandlers() {
