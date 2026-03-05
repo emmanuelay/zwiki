@@ -221,7 +221,11 @@ function renderTreeElement(rootElement, rootFolder) {
 		checkbox.type = "checkbox";
 		checkbox.id = folder.id;
 		label.htmlFor = folder.id;
-		label.innerText = folder.name;
+
+		const folderIcon = document.createElement("span");
+		folderIcon.className = "folder-icon";
+		label.appendChild(folderIcon);
+		label.appendChild(document.createTextNode(folder.name));
 
 		li.appendChild(checkbox);
 		li.appendChild(label);
@@ -237,7 +241,11 @@ function renderTreeElement(rootElement, rootFolder) {
 			const span = document.createElement("span");
 			const ahref = document.createElement("a");
 			ahref.innerText = node.title;
-			ahref.addEventListener("click", function(){loadNode(node.path)});
+			ahref.addEventListener("click", function(){
+				document.querySelectorAll(".tree li span.active").forEach(el => el.classList.remove("active"));
+				span.classList.add("active");
+				loadNode(node.path);
+			});
 			span.appendChild(ahref);
 			li.appendChild(span);
 			ul.appendChild(li);

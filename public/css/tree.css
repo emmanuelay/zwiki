@@ -6,58 +6,45 @@
 	padding: 0;
 	border: 0;
 	outline: 0;
+	list-style: none;
 	text-decoration: none;
 	text-align: left;
 	font-size: 0.8rem;
-}
-
-.tree ul:before,
-.tree li:before,
-.tree li:after {
-	position: absolute;
-	right: auto;
-	content: '';
-	user-select: none;
+	line-height: 1.8;
 }
 
 .tree {
-	padding: 1rem;
+	padding: 0.75rem 1rem;
+	user-select: none;
 }
 
-.tree,
-.tree ul:before,
-.tree li:before {
-	bottom: auto;
+.tree ul {
+	margin-left: 0.75rem;
+	padding-left: 0.75rem;
+	border-left: 1px solid #d1d5db;
 }
 
-.tree ul,
+.tree > ul {
+	margin-left: 0;
+	padding-left: 0;
+	border-left: none;
+}
+
 .tree li {
 	position: relative;
-	padding: 0 0 3px;
-}
-
-.tree ul:before,
-.tree li:after {
-	background: #a6a6a6;
-}
-
-.tree ul:before {
-	width: 0px;
-	height: 1px;
-	top: 0;
-	left: 6px;
-}
-
-.tree li {
-	padding: 0 0 0 1.2rem;
-}
-
-.tree li label {
-	display: inline-block;
-	cursor: pointer;
 }
 
 .tree input {
+	display: none;
+	appearance: none;
+	-webkit-appearance: none;
+}
+
+.tree li::marker {
+	content: none;
+}
+
+.tree li::-webkit-details-marker {
 	display: none;
 }
 
@@ -69,91 +56,124 @@
 	display: block;
 }
 
-.tree li:before {
-	content: "";
-	background: transparent 0 2px repeat-x url('data:image/gif;base64,R0lGODlhAQABAPAAAKampgAAACwAAAAAAQABAAACAkQBADs=');
-	width: 10px;
-	top: 5px;
-	left: 0;
-	height: 3px;
+/* Folder label */
+.tree li label {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	cursor: pointer;
+	color: #555;
+	padding: 0.1rem 0.25rem;
+	border-radius: 4px;
 }
 
-.tree li:after {
-	height: auto;
-	width: 1px;
-	top: 0;
-	left: 0;
-	bottom: 0;
+.tree li label:hover {
+	color: #000;
+	background: rgba(0, 0, 0, 0.04);
 }
 
-.tree li:last-child:after {
-	height: 7px;
+/* +/- indicator */
+.tree input[type="checkbox"]~label::before {
+	content: "+";
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #999;
 }
 
-/* Folder, closed */
-.tree input[type="checkbox"]~label {
+.tree input[type="checkbox"]:checked~label::before {
+	content: "\2212";
+}
+
+/* Folder icon */
+.tree label .folder-icon {
 	display: inline-block;
-	width: 100%;
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
 	background-image: url(/img/folder.closed.svg);
 	background-repeat: no-repeat;
-	background-size: 0.75rem 0.75rem;
-	background-position: left center;
-	padding-left: 1.2rem;
-	color: #555;
+	background-size: 1rem 1rem;
+	background-position: center;
 }
 
-.tree input[type="checkbox"]~label:hover {
-	color: #000;
-}
-
-/* Folder, open */
-.tree input[type="checkbox"]:checked~label {
+.tree input[type="checkbox"]:checked~label .folder-icon {
 	background-image: url(/img/folder.open.svg);
-	background-repeat: no-repeat;
-	background-size: 0.75rem 0.75rem;
-	background-position: left center;
-	padding-left: 1.2rem;
 }
 
 /* Document */
-.tree li span {
-	display: inline-block;
-	width: 100%;
-	background-image: url(/img/document.svg);
-	background-repeat: no-repeat;
-	background-size: 0.8rem 0.8rem;
-	background-position: left center;
-	padding-left: 1.2rem;
+.tree li > span {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.1rem 0.25rem;
+	padding-left: calc(1rem + 0.6rem);
 	cursor: pointer;
 	color: #888;
+	border-radius: 4px;
 }
 
-.tree li span:hover {
+.tree li > span::before {
+	content: "";
+	display: inline-block;
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+	background-image: url(/img/document.svg);
+	background-repeat: no-repeat;
+	background-size: 1rem 1rem;
+	background-position: center;
+}
+
+.tree li > span:hover {
 	color: #000;
+	background: rgba(0, 0, 0, 0.04);
+}
+
+.tree li > span.active {
+	color: #000;
+	background: rgba(0, 0, 0, 0.08);
 }
 
 /* Dark mode */
 
-:root.dark .tree ul:before,
-:root.dark .tree li:after {
-	background: #4b5563;
+:root.dark .tree ul {
+	border-left-color: #374151;
 }
 
-:root.dark .tree input[type="checkbox"]~label {
-	color: #9ca3af;
+:root.dark .tree li label {
+	color: #d1d5db;
 }
 
-:root.dark .tree input[type="checkbox"]~label:hover {
+:root.dark .tree li label:hover {
 	color: #e5e7eb;
+	background: rgba(255, 255, 255, 0.05);
 }
 
-:root.dark .tree li span {
+:root.dark .tree input[type="checkbox"]~label::before {
 	color: #6b7280;
 }
 
-:root.dark .tree li span:hover {
-	color: #e5e7eb;
+:root.dark .tree li > span {
+	color: #6b7280;
 }
+
+:root.dark .tree li > span:hover {
+	color: #e5e7eb;
+	background: rgba(255, 255, 255, 0.05);
+}
+
+:root.dark .tree li > span.active {
+	color: #e5e7eb;
+	background: rgba(255, 255, 255, 0.1);
+}
+
+/* Outline (kept here from before) */
 
 :root.dark #outline .outline-title {
 	color: #6b7280;
