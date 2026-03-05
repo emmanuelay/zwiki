@@ -211,26 +211,23 @@ func (repo *fileSystemRepository) UpdateNode(ctx context.Context, path string, n
 		return fmt.Errorf("failed building path: %w", err)
 	}
 
-	// Preserve existing frontmatter
-	existing, err := os.ReadFile(absolutePath)
-	if err != nil {
-		return fmt.Errorf("failed reading file: %w", err)
-	}
+	var buf strings.Builder
 
-	var content string
-	raw := string(existing)
-	if strings.HasPrefix(raw, "---\n") {
-		if end := strings.Index(raw[4:], "\n---"); end != -1 {
-			frontmatterBlock := raw[:4+end+4]
-			content = frontmatterBlock + "\n" + node.Content + "\n"
-		} else {
-			content = node.Content + "\n"
+	if len(node.Meta) > 0 {
+		buf.WriteString("---\n")
+		for k, v := range node.Meta {
+			buf.WriteString(k)
+			buf.WriteString(": ")
+			buf.WriteString(v)
+			buf.WriteString("\n")
 		}
-	} else {
-		content = node.Content + "\n"
+		buf.WriteString("---\n")
 	}
 
-	return os.WriteFile(absolutePath, []byte(content), 0644)
+	buf.WriteString(node.Content)
+	buf.WriteString("\n")
+
+	return os.WriteFile(absolutePath, []byte(buf.String()), 0644)
 }
 
 func (repo *fileSystemRepository) DeleteNode(ctx context.Context, path string, node models.Node) error {

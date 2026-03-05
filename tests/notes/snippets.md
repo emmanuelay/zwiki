@@ -1,8 +1,8 @@
 ---
-title: Code Snippets
 tags: code, reference, golang
+title: Code Snippets
+author: Emmanuel Ay
 ---
-
 # Code Snippets
 
 ## Read a file in Go

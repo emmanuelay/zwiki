@@ -1,8 +1,8 @@
 ---
-title: Welcome
 tags: home, overview
+title: Welcome
+author: Emmanuel Ay
 ---
-
 # Welcome to the Wiki
 
 This is the main entry point. From here you can navigate to different topics using the sidebar.

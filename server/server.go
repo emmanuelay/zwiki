@@ -91,7 +91,8 @@ func (a *Api) UpdateNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		Content string `json:"content"`
+		Content string            `json:"content"`
+		Meta    map[string]string `json:"meta"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
@@ -107,6 +108,7 @@ func (a *Api) UpdateNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	node.Content = payload.Content
+	node.Meta = payload.Meta
 
 	if err := a.repo.UpdateNode(r.Context(), slug, node); err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("failed updating node '%v': %v", slug, err.Error()))

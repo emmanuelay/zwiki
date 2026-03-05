@@ -1,9 +1,9 @@
 ---
 title: Project Ideas
-tags: brainstorming, projects
+author: Emmanuel Ay
 status: draft
+tags: brainstorming, projects
 ---
-
 # Project Ideas
 
 A collection of project ideas worth exploring.

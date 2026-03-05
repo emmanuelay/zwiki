@@ -3,12 +3,12 @@ title: Go Patterns
 tags: golang, patterns, reference
 author: Emmanuel
 ---
-
 # Go Patterns
 
 ## Repository Pattern
 
 The repository pattern abstracts data access behind an interface. This makes it easy to swap implementations (filesystem, database, etc.) without changing business logic.
+
 
 ```go
 type Repository interface {

@@ -49,7 +49,25 @@
         </div>
         <div id="content-body" class="flex flex-1 overflow-hidden">
           <div id="viewer" class="viewer"></div>
-          <textarea id="editor" class="hidden flex-1 border-0 p-4 sm:p-8 lg:p-12 text-sm leading-relaxed font-mono text-black dark:text-gray-100 bg-white dark:bg-gray-950 caret-blue-600 resize-none outline-none"></textarea>
+          <div id="editor-wrapper" class="hidden flex-1 flex flex-col relative">
+            <div id="frontmatter-panel" class="hidden border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 overflow-y-auto" style="max-height: 30vh;">
+              <div class="px-4 pt-3 pb-1">
+                <span class="uppercase text-xs font-bold text-gray-400 dark:text-gray-500">Frontmatter</span>
+              </div>
+              <div id="frontmatter-fields" class="px-4 pb-2 flex flex-col gap-2"></div>
+              <div class="px-4 pb-4">
+                <button id="btn-add-field" class="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Add field
+                </button>
+              </div>
+            </div>
+            <textarea id="editor" class="flex-1 border-0 p-4 sm:p-8 lg:p-12 text-sm leading-relaxed font-mono text-black dark:text-gray-100 bg-white dark:bg-gray-950 caret-blue-600 resize-none outline-none"></textarea>
+            <button id="btn-frontmatter" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" title="Edit frontmatter">
+              <svg id="icon-fm-open" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              <svg id="icon-fm-close" class="hidden w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
           <div id="outline" class="flex-none w-56 p-5 border-l border-gray-100 dark:border-gray-800 overflow-y-auto text-xs text-gray-500 dark:text-gray-400"></div>
         </div>
       </div>
