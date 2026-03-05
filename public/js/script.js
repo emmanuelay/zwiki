@@ -239,14 +239,12 @@ function renderTreeElement(rootElement, rootFolder) {
 			const node = rootFolder.nodes[fileIndex];
 			const li = document.createElement("li");
 			const span = document.createElement("span");
-			const ahref = document.createElement("a");
-			ahref.innerText = node.title;
-			ahref.addEventListener("click", function(){
-				document.querySelectorAll(".tree li span.active").forEach(el => el.classList.remove("active"));
+			span.innerText = node.title;
+			span.addEventListener("click", function(){
+				document.querySelectorAll(".tree li > span.active").forEach(el => el.classList.remove("active"));
 				span.classList.add("active");
 				loadNode(node.path);
 			});
-			span.appendChild(ahref);
 			li.appendChild(span);
 			ul.appendChild(li);
 		}
@@ -292,6 +290,8 @@ async function loadNode(path) {
 	styleEditButton("edit");
 	document.getElementById("btn-save").classList.add("hidden");
 
+	document.getElementById("btn-edit").classList.remove("hidden");
+	document.getElementById("outline").classList.remove("hidden");
 	attachLinkHandlers();
 	updateOutline(currentContent);
 }
@@ -411,7 +411,9 @@ function searchByTag(tag) {
 	document.getElementById("btn-edit").innerText = "Edit";
 	styleEditButton("edit");
 	document.getElementById("btn-save").classList.add("hidden");
+	document.getElementById("btn-edit").classList.add("hidden");
 	document.getElementById("outline").innerHTML = "";
+	document.getElementById("outline").classList.add("hidden");
 
 	// Render results
 	viewer.innerHTML = "";
