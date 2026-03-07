@@ -8,12 +8,14 @@ import (
 	"testing"
 
 	"github.com/emmanuelay/zwiki/nodes"
+	"github.com/emmanuelay/zwiki/search"
 	"github.com/emmanuelay/zwiki/server"
 )
 
 func initApi() *server.Api {
 	repo := nodes.NewFileSystemRepository("../tests/")
-	api := server.NewApi(8080, repo)
+	searchIndex, _ := search.NewIndex()
+	api := server.NewApi(8080, repo, searchIndex)
 	return api
 }
 

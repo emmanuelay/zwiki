@@ -10,19 +10,22 @@ import (
 
 	"github.com/emmanuelay/zwiki/nodes"
 	assets "github.com/emmanuelay/zwiki/public"
+	"github.com/emmanuelay/zwiki/search"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
 
 type Api struct {
-	port int
-	repo nodes.Repository
+	port   int
+	repo   nodes.Repository
+	search *search.Index
 }
 
-func NewApi(port int, repo nodes.Repository) *Api {
+func NewApi(port int, repo nodes.Repository, searchIndex *search.Index) *Api {
 	return &Api{
-		port: port,
-		repo: repo,
+		port:   port,
+		repo:   repo,
+		search: searchIndex,
 	}
 }
 
@@ -43,6 +46,7 @@ func (api *Api) Serve() {
 		apiRouter.Put("/update", api.UpdateNode)
 		apiRouter.Post("/create", api.CreateNode)
 		apiRouter.Delete("/delete", api.DeleteNode)
+		apiRouter.Get("/search", api.Search)
 	})
 
 	r.Handle("/*", fs)
@@ -115,6 +119,8 @@ func (a *Api) UpdateNode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	a.search.IndexNode(node)
+
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{"status": "updateNode", "data": node})
 }
 
@@ -124,6 +130,22 @@ func (a *Api) CreateNode(w http.ResponseWriter, r *http.Request) {
 
 func (a *Api) DeleteNode(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]string{"status": "deleteNode"})
+}
+
+func (a *Api) Search(w http.ResponseWriter, r *http.Request) {
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if len(q) == 0 {
+		respondWithError(w, http.StatusBadRequest, "missing query parameter 'q'")
+		return
+	}
+
+	results, err := a.search.Search(q, 20)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("search failed: %v", err))
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"results": results})
 }
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {

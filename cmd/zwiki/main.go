@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/emmanuelay/zwiki/nodes"
+	"github.com/emmanuelay/zwiki/search"
 	"github.com/emmanuelay/zwiki/server"
 )
 
@@ -22,7 +25,24 @@ func main() {
 	}
 
 	fsRepo := nodes.NewFileSystemRepository(path)
-	api := server.NewApi(port, fsRepo)
 
+	searchIndex, err := search.NewIndex()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create search index: %v\n", err)
+		os.Exit(1)
+	}
+
+	folder, err := fsRepo.GetAll(context.Background())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load nodes for indexing: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := searchIndex.BuildFromFolder(folder, fsRepo); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to build search index: %v\n", err)
+		os.Exit(1)
+	}
+
+	api := server.NewApi(port, fsRepo, searchIndex)
 	api.Serve()
 }

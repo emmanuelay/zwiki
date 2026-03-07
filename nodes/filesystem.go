@@ -19,6 +19,7 @@ import (
 type Repository interface {
 	GetAll(ctx context.Context) (models.Folder, error)
 	GetNode(ctx context.Context, path string) (models.Node, error)
+	GetNodeContent(path string) (string, error)
 	CreateNode(ctx context.Context, path string, node models.Node) error
 	UpdateNode(ctx context.Context, path string, node models.Node) error
 	DeleteNode(ctx context.Context, path string, node models.Node) error
@@ -199,6 +200,27 @@ func (repo *fileSystemRepository) GetNode(ctx context.Context, path string) (mod
 	}
 
 	return node, nil
+}
+
+func (repo *fileSystemRepository) GetNodeContent(path string) (string, error) {
+	fullPath := filepath.Join(repo.root, path)
+	absolutePath, err := filepath.Abs(fullPath)
+	if err != nil {
+		return "", err
+	}
+
+	data, err := os.ReadFile(absolutePath)
+	if err != nil {
+		return "", err
+	}
+
+	var matter map[string]any
+	body, err := frontmatter.Parse(bytes.NewReader(data), &matter)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(string(body)), nil
 }
 
 func (repo *fileSystemRepository) CreateNode(ctx context.Context, path string, node models.Node) error {
