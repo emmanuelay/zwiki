@@ -17,12 +17,11 @@ function onLoad(event) {
 	document.getElementById("btn-add-field").addEventListener("click", () => addFrontmatterRow("", ""));
 	initResizeHandle();
 
-	// Restore dark mode preference
-	if (localStorage.getItem("darkMode") === "true") {
-		document.documentElement.classList.add("dark");
-		document.getElementById("icon-sun").classList.remove("hidden");
-		document.getElementById("icon-moon").classList.add("hidden");
-	}
+	// Restore dark mode preference (system default unless overridden)
+	applyDarkMode();
+	window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+		if (localStorage.getItem("darkMode") === null) applyDarkMode();
+	});
 
 	fetchTree()
 		.then(tree => {
@@ -583,6 +582,14 @@ function initResizeHandle() {
 		document.body.style.cursor = "";
 		document.body.style.userSelect = "";
 	});
+}
+
+function applyDarkMode() {
+	const stored = localStorage.getItem("darkMode");
+	const isDark = stored !== null ? stored === "true" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+	document.documentElement.classList.toggle("dark", isDark);
+	document.getElementById("icon-sun").classList.toggle("hidden", !isDark);
+	document.getElementById("icon-moon").classList.toggle("hidden", isDark);
 }
 
 function toggleDarkMode() {

@@ -193,6 +193,7 @@ func (repo *fileSystemRepository) GetNode(ctx context.Context, path string) (mod
 
 	node := models.Node{
 		ID:      absolutePath,
+		Path:    "/" + strings.TrimPrefix(path, "/"),
 		Content: content,
 		Meta:    meta,
 	}
