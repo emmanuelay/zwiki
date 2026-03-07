@@ -32,6 +32,7 @@
 
 .tree li {
 	position: relative;
+	margin-top: 0.15rem;
 }
 
 .tree input {
@@ -62,7 +63,7 @@
 	align-items: center;
 	gap: 0.35rem;
 	cursor: pointer;
-	color: #555;
+	color: #999;
 	padding: 0.1rem 0.25rem;
 	border-radius: 4px;
 	overflow: hidden;
@@ -84,9 +85,13 @@
 	width: 1rem;
 	height: 1rem;
 	flex-shrink: 0;
-	font-size: 0.75rem;
+	font-size: 1rem;
 	font-weight: 600;
 	color: #999;
+}
+
+.tree input[type="checkbox"]:checked~label {
+	color: #555;
 }
 
 .tree input[type="checkbox"]:checked~label::before {
@@ -153,12 +158,16 @@
 }
 
 :root.dark .tree li label {
-	color: #d1d5db;
+	color: #9ca3af;
 }
 
 :root.dark .tree li label:hover {
 	color: #e5e7eb;
 	background: rgba(255, 255, 255, 0.05);
+}
+
+:root.dark .tree input[type="checkbox"]:checked~label {
+	color: #d1d5db;
 }
 
 :root.dark .tree input[type="checkbox"]~label::before {
@@ -186,7 +195,15 @@
 }
 
 :root.dark #outline a {
+	color: #d1d5db;
+}
+
+:root.dark #outline ul ul a {
 	color: #9ca3af;
+}
+
+:root.dark #outline ul ul ul a {
+	color: #6b7280;
 }
 
 :root.dark #outline a:hover {

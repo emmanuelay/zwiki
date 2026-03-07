@@ -72,6 +72,7 @@ function toggleEditor() {
 		const article = document.createElement("div");
 		article.innerHTML = marked.parse(currentContent);
 		viewer.appendChild(article);
+		hljs.highlightAll();
 		attachLinkHandlers();
 		updateOutline(currentContent);
 		editorWrapper.classList.add("hidden");
@@ -284,6 +285,7 @@ async function loadNode(path) {
 	const article = document.createElement("div");
 	article.innerHTML = marked.parse(currentContent);
 	viewer.appendChild(article);
+	hljs.highlightAll();
 	viewer.classList.remove("hidden");
 	document.getElementById("editor-wrapper").classList.add("hidden");
 	resetFrontmatterPanel();
@@ -592,6 +594,7 @@ function applyDarkMode() {
 	document.documentElement.classList.toggle("dark", isDark);
 	document.getElementById("icon-sun").classList.toggle("hidden", !isDark);
 	document.getElementById("icon-moon").classList.toggle("hidden", isDark);
+	syncHljsTheme(isDark);
 }
 
 function toggleSidebar() {
@@ -607,6 +610,12 @@ function toggleDarkMode() {
 	localStorage.setItem("darkMode", isDark);
 	document.getElementById("icon-sun").classList.toggle("hidden", !isDark);
 	document.getElementById("icon-moon").classList.toggle("hidden", isDark);
+	syncHljsTheme(isDark);
+}
+
+function syncHljsTheme(isDark) {
+	document.getElementById("hljs-light").media = isDark ? "none" : "all";
+	document.getElementById("hljs-dark").media = isDark ? "all" : "none";
 }
 
 function attachLinkHandlers() {

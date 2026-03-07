@@ -347,9 +347,17 @@
 }
 
 #outline a {
-	color: #666;
+	color: #555;
 	text-decoration: none;
 	cursor: pointer;
+}
+
+#outline ul ul a {
+	color: #777;
+}
+
+#outline ul ul ul a {
+	color: #999;
 }
 
 #outline a:hover {
