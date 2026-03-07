@@ -23,3 +23,22 @@
 :root.dark #toc {
 	scrollbar-color: #4b5563 transparent;
 }
+
+/* Sidebar collapse on small screens */
+@media (max-width: 767px) {
+	#toc {
+		display: none;
+	}
+	#toc.sidebar-open {
+		display: block;
+	}
+	#resize-handle {
+		display: none;
+	}
+}
+
+@media (min-width: 768px) {
+	#sidebar-backdrop {
+		display: none !important;
+	}
+}

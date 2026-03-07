@@ -24,8 +24,11 @@
   <body class="m-0 p-0 bg-white dark:bg-gray-950">
     <div id="container" class="flex flex-row h-screen">
 
+      <!-- Sidebar overlay backdrop (mobile) -->
+      <div id="sidebar-backdrop" class="hidden fixed inset-0 bg-black/40 z-20 md:hidden" onclick="toggleSidebar()"></div>
+
       <!-- Sidebar -->
-      <div id="toc" class="flex-none bg-gray-100 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto overflow-x-hidden" style="width: 18rem;">
+      <div id="toc" class="flex-none bg-gray-100 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto overflow-x-hidden fixed md:relative z-30 md:z-auto h-full" style="width: 18rem;">
         <div class="sticky top-0 z-10 bg-gray-200 dark:bg-gray-800 px-5 border-b border-black/5 dark:border-white/5 h-14 flex items-center justify-between">
           <h1 class="uppercase text-xs font-bold text-gray-600 dark:text-gray-300">ZWiki</h1>
           <button id="btn-darkmode" class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white cursor-pointer" title="Toggle dark mode">
@@ -42,7 +45,10 @@
       <!-- Content -->
       <div id="content" class="flex flex-col flex-1 overflow-hidden bg-white dark:bg-gray-950">
         <div class="sticky top-0 flex items-center justify-between px-5 bg-gray-50 dark:bg-gray-900 border-b border-black/5 dark:border-white/5 flex-none h-14">
-          <div>
+          <div class="flex items-center gap-3">
+            <button id="btn-sidebar" class="md:hidden text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white cursor-pointer" onclick="toggleSidebar()" title="Toggle sidebar">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
             <h1 id="content-title" class="uppercase text-xs font-bold text-gray-600 dark:text-gray-300">Content title</h1>
           </div>
           <div class="flex gap-2">

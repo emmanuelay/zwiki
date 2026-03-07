@@ -244,6 +244,7 @@ function renderTreeElement(rootElement, rootFolder) {
 				document.querySelectorAll(".tree li > span.active").forEach(el => el.classList.remove("active"));
 				span.classList.add("active");
 				loadNode(node.path);
+				if (window.innerWidth < 768) toggleSidebar();
 			});
 			li.appendChild(span);
 			ul.appendChild(li);
@@ -436,6 +437,7 @@ function searchByTag(tag) {
 		a.addEventListener("click", e => {
 			e.preventDefault();
 			loadNode(node.path);
+			if (window.innerWidth < 768) toggleSidebar();
 		});
 		li.appendChild(a);
 
@@ -590,6 +592,14 @@ function applyDarkMode() {
 	document.documentElement.classList.toggle("dark", isDark);
 	document.getElementById("icon-sun").classList.toggle("hidden", !isDark);
 	document.getElementById("icon-moon").classList.toggle("hidden", isDark);
+}
+
+function toggleSidebar() {
+	const toc = document.getElementById("toc");
+	const backdrop = document.getElementById("sidebar-backdrop");
+	const isOpen = toc.classList.contains("sidebar-open");
+	toc.classList.toggle("sidebar-open", !isOpen);
+	backdrop.classList.toggle("hidden", isOpen);
 }
 
 function toggleDarkMode() {
