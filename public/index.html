@@ -85,5 +85,17 @@
       </div>
 
     </div>
+
+    <!-- Search modal -->
+    <div id="search-backdrop" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-start justify-center pt-[15vh]" onclick="closeSearch(event)">
+      <div id="search-modal" class="bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg mx-4 overflow-hidden">
+        <div class="flex items-center px-4 border-b border-gray-200 dark:border-gray-700">
+          <svg class="w-4 h-4 text-gray-400 flex-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+          <input id="search-input" type="text" placeholder="Search notes..." class="flex-1 px-3 py-3 text-sm bg-transparent border-0 outline-none text-black dark:text-gray-100 placeholder-gray-400" autocomplete="off" />
+          <kbd class="text-[10px] text-gray-400 border border-gray-300 dark:border-gray-600 rounded px-1.5 py-0.5">ESC</kbd>
+        </div>
+        <div id="search-results" class="max-h-80 overflow-y-auto"></div>
+      </div>
+    </div>
   </body>
 </html>

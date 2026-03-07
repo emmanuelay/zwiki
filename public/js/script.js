@@ -8,6 +8,9 @@ let currentPath = "";
 let currentMeta = null;
 let editing = false;
 
+let searchDebounceTimer = null;
+let searchActiveIndex = -1;
+
 function onLoad(event) {
 	document.getElementById("btn-edit").addEventListener("click", toggleEditor);
 	document.getElementById("btn-save").addEventListener("click", saveNode);
@@ -16,6 +19,7 @@ function onLoad(event) {
 	document.getElementById("btn-frontmatter").addEventListener("click", toggleFrontmatter);
 	document.getElementById("btn-add-field").addEventListener("click", () => addFrontmatterRow("", ""));
 	initResizeHandle();
+	initSearch();
 
 	// Restore dark mode preference (system default unless overridden)
 	applyDarkMode();
@@ -616,6 +620,116 @@ function toggleDarkMode() {
 function syncHljsTheme(isDark) {
 	document.getElementById("hljs-light").media = isDark ? "none" : "all";
 	document.getElementById("hljs-dark").media = isDark ? "all" : "none";
+}
+
+function initSearch() {
+	document.addEventListener("keydown", (e) => {
+		if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+			e.preventDefault();
+			openSearch();
+		}
+		if (e.key === "Escape") {
+			closeSearch();
+		}
+	});
+
+	const input = document.getElementById("search-input");
+	input.addEventListener("input", () => {
+		clearTimeout(searchDebounceTimer);
+		searchDebounceTimer = setTimeout(() => performSearch(input.value.trim()), 200);
+	});
+
+	input.addEventListener("keydown", (e) => {
+		const items = document.querySelectorAll("#search-results .search-item");
+		if (e.key === "ArrowDown") {
+			e.preventDefault();
+			searchActiveIndex = Math.min(searchActiveIndex + 1, items.length - 1);
+			updateSearchActive(items);
+		} else if (e.key === "ArrowUp") {
+			e.preventDefault();
+			searchActiveIndex = Math.max(searchActiveIndex - 1, 0);
+			updateSearchActive(items);
+		} else if (e.key === "Enter" && searchActiveIndex >= 0 && items[searchActiveIndex]) {
+			e.preventDefault();
+			items[searchActiveIndex].click();
+		}
+	});
+}
+
+function openSearch() {
+	const backdrop = document.getElementById("search-backdrop");
+	backdrop.classList.remove("hidden");
+	const input = document.getElementById("search-input");
+	input.value = "";
+	document.getElementById("search-results").innerHTML = "";
+	searchActiveIndex = -1;
+	setTimeout(() => input.focus(), 50);
+}
+
+function closeSearch(e) {
+	if (e && e.target !== document.getElementById("search-backdrop")) return;
+	document.getElementById("search-backdrop").classList.add("hidden");
+	document.getElementById("search-input").value = "";
+	document.getElementById("search-results").innerHTML = "";
+	searchActiveIndex = -1;
+}
+
+async function performSearch(query) {
+	const results = document.getElementById("search-results");
+	if (!query) {
+		results.innerHTML = "";
+		searchActiveIndex = -1;
+		return;
+	}
+
+	const response = await fetch("/api/search?q=" + encodeURIComponent(query));
+	if (!response.ok) {
+		results.innerHTML = '<div class="search-empty">Search failed</div>';
+		return;
+	}
+
+	const data = await response.json();
+	searchActiveIndex = -1;
+
+	if (!data.results || data.results.length === 0) {
+		results.innerHTML = '<div class="search-empty">No results found</div>';
+		return;
+	}
+
+	results.innerHTML = "";
+	data.results.forEach((item, idx) => {
+		const div = document.createElement("div");
+		div.className = "search-item";
+
+		const title = document.createElement("div");
+		title.className = "search-item-title";
+		title.textContent = item.title || item.path;
+		div.appendChild(title);
+
+		if (item.fragments) {
+			const frag = document.createElement("div");
+			frag.className = "search-item-fragment";
+			const text = Object.values(item.fragments).flat()[0];
+			if (text) frag.innerHTML = text;
+			div.appendChild(frag);
+		}
+
+		div.addEventListener("click", () => {
+			closeSearch();
+			loadNode(item.path);
+		});
+
+		results.appendChild(div);
+	});
+}
+
+function updateSearchActive(items) {
+	items.forEach((el, i) => {
+		el.classList.toggle("active", i === searchActiveIndex);
+	});
+	if (items[searchActiveIndex]) {
+		items[searchActiveIndex].scrollIntoView({ block: "nearest" });
+	}
 }
 
 function attachLinkHandlers() {

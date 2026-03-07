@@ -2,8 +2,10 @@ package search
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/emmanuelay/zwiki/models"
 )
 
@@ -92,12 +94,24 @@ func flattenFolder(folder models.Folder) []models.Node {
 	return result
 }
 
-func (si *Index) Search(query string, limit int) ([]Result, error) {
+func (si *Index) Search(searchQuery string, limit int) ([]Result, error) {
 	if limit <= 0 {
 		limit = 20
 	}
 
-	q := bleve.NewQueryStringQuery(query)
+	terms := strings.Fields(strings.ToLower(searchQuery))
+	var queries []query.Query
+	for _, term := range terms {
+		queries = append(queries, bleve.NewWildcardQuery("*"+term+"*"))
+	}
+
+	var q query.Query
+	if len(queries) == 1 {
+		q = queries[0]
+	} else {
+		q = bleve.NewConjunctionQuery(queries...)
+	}
+
 	req := bleve.NewSearchRequestOptions(q, limit, 0, false)
 	req.Highlight = bleve.NewHighlightWithStyle("html")
 	req.Fields = []string{"title", "path"}
