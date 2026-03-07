@@ -11,6 +11,7 @@ Use it to navigate documentation in a software project or maintain a personal kn
 - **Editor** — In-browser markdown editing with live outline updates
 - **Frontmatter** — YAML frontmatter parsing and a dedicated key-value editor
 - **Wiki-links** — `[[link]]` syntax to connect documents by title or filename
+- **Full-text search** — In-memory search powered by [Bleve](https://github.com/blevesearch/bleve), triggered with `Cmd+K` / `Ctrl+K`
 - **Tags** — Clickable tag chips that search for all documents sharing a tag
 - **Document outline** — Auto-generated heading tree for quick navigation
 - **Dark mode** — Toggle with persistent preference via localStorage
@@ -92,9 +93,15 @@ See [[My Document]] for details.
 
 Links resolve by matching the frontmatter `title` first, then the filename (without extension). Unresolved links are displayed as broken links.
 
+## Search
+
+Press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux) to open the search modal. Results update as you type and support partial matching — typing "proj" will match "project". Use arrow keys to navigate results and Enter to select.
+
+The search index is built in-memory at startup from all markdown files and stays in sync when documents are updated through the editor.
+
 ## Tech stack
 
-- **Backend** — Go with [chi](https://github.com/go-chi/chi) router
+- **Backend** — Go with [chi](https://github.com/go-chi/chi) router and [Bleve](https://github.com/blevesearch/bleve) search
 - **Frontend** — Vanilla JS, [Tailwind CSS](https://tailwindcss.com) (CDN), [marked.js](https://marked.js.org) for markdown rendering
 - **Frontmatter** — [adrg/frontmatter](https://github.com/adrg/frontmatter)
 - **Static assets** — Embedded via Go's `embed.FS`

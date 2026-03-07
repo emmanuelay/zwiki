@@ -210,22 +210,23 @@ function renderTree(tree) {
 		rootNode.removeChild(child);
 	}
 
-	renderTreeElement(rootNode, tree);
+	renderTreeElement(rootNode, tree, "");
 }
 
-function renderTreeElement(rootElement, rootFolder) {
+function renderTreeElement(rootElement, rootFolder, parentPath) {
 	const ul = document.createElement("ul");
 
 	for (let index = 0; index < rootFolder.folders.length; index++) {
 		const folder = rootFolder.folders[index];
+		const folderPath = parentPath + "/" + folder.name;
 		const li = document.createElement("li");
 
 		const checkbox = document.createElement("input");
 		const label = document.createElement("label");
 
 		checkbox.type = "checkbox";
-		checkbox.id = folder.id;
-		label.htmlFor = folder.id;
+		checkbox.id = "folder:" + folderPath;
+		label.htmlFor = "folder:" + folderPath;
 
 		const folderIcon = document.createElement("span");
 		folderIcon.className = "folder-icon";
@@ -235,7 +236,7 @@ function renderTreeElement(rootElement, rootFolder) {
 		li.appendChild(checkbox);
 		li.appendChild(label);
 
-		renderTreeElement(li, folder);
+		renderTreeElement(li, folder, folderPath);
 		ul.appendChild(li);
 	}
 
@@ -245,6 +246,7 @@ function renderTreeElement(rootElement, rootFolder) {
 			const li = document.createElement("li");
 			const span = document.createElement("span");
 			span.innerText = node.title;
+			span.setAttribute("data-path", node.path);
 			span.addEventListener("click", function(){
 				document.querySelectorAll(".tree li > span.active").forEach(el => el.classList.remove("active"));
 				span.classList.add("active");
@@ -301,6 +303,29 @@ async function loadNode(path) {
 	document.getElementById("outline").classList.remove("hidden");
 	attachLinkHandlers();
 	updateOutline(currentContent);
+	revealInTree(path);
+}
+
+function revealInTree(path) {
+	document.querySelectorAll(".tree li > span.active").forEach(el => el.classList.remove("active"));
+
+	const span = document.querySelector(`.tree li > span[data-path="${CSS.escape(path)}"]`);
+	if (!span) return;
+
+	span.classList.add("active");
+
+	// Expand parent folders by checking their checkboxes
+	let el = span.closest("li");
+	while (el) {
+		const parent = el.parentElement?.closest("li");
+		if (parent) {
+			const checkbox = parent.querySelector(":scope > input[type='checkbox']");
+			if (checkbox) checkbox.checked = true;
+		}
+		el = parent;
+	}
+
+	span.scrollIntoView({ block: "nearest" });
 }
 
 function updateOutline(markdown) {
