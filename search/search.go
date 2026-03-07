@@ -10,9 +10,10 @@ import (
 )
 
 type Document struct {
-	Path    string `json:"path"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Path    string   `json:"path"`
+	Title   string   `json:"title"`
+	Content string   `json:"content"`
+	Tags    []string `json:"tags"`
 }
 
 type Result struct {
@@ -20,6 +21,12 @@ type Result struct {
 	Title     string              `json:"title"`
 	Score     float64             `json:"score"`
 	Fragments map[string][]string `json:"fragments,omitempty"`
+	Tags      []string            `json:"tags,omitempty"`
+}
+
+type FacetEntry struct {
+	Term  string `json:"term"`
+	Count int    `json:"count"`
 }
 
 type Index struct {
@@ -46,6 +53,10 @@ func NewIndex() (*Index, error) {
 	pathField.Index = false
 	docMapping.AddFieldMappingsAt("path", pathField)
 
+	tagsField := bleve.NewKeywordFieldMapping()
+	tagsField.Store = true
+	docMapping.AddFieldMappingsAt("tags", tagsField)
+
 	mapping.AddDocumentMapping("node", docMapping)
 	mapping.DefaultMapping = docMapping
 
@@ -70,6 +81,7 @@ func (si *Index) BuildFromFolder(folder models.Folder, repo nodeReader) error {
 			Path:    n.Path,
 			Title:   n.Title,
 			Content: content,
+			Tags:    parseTags(n.Meta),
 		}
 		batch.Index(n.Path, doc)
 	}
@@ -85,6 +97,21 @@ func readNodeContent(repo nodeReader, path string) (string, error) {
 	return repo.GetNodeContent(path)
 }
 
+func parseTags(meta map[string]string) []string {
+	raw, ok := meta["tags"]
+	if !ok || raw == "" {
+		return nil
+	}
+	var tags []string
+	for _, t := range strings.Split(raw, ",") {
+		t = strings.TrimSpace(t)
+		if t != "" {
+			tags = append(tags, t)
+		}
+	}
+	return tags
+}
+
 func flattenFolder(folder models.Folder) []models.Node {
 	var result []models.Node
 	result = append(result, folder.Nodes...)
@@ -94,7 +121,7 @@ func flattenFolder(folder models.Folder) []models.Node {
 	return result
 }
 
-func (si *Index) Search(searchQuery string, limit int) ([]Result, error) {
+func (si *Index) Search(searchQuery string, limit int) ([]Result, map[string][]FacetEntry, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -114,11 +141,12 @@ func (si *Index) Search(searchQuery string, limit int) ([]Result, error) {
 
 	req := bleve.NewSearchRequestOptions(q, limit, 0, false)
 	req.Highlight = bleve.NewHighlightWithStyle("html")
-	req.Fields = []string{"title", "path"}
+	req.Fields = []string{"title", "path", "tags"}
+	req.AddFacet("tags", bleve.NewFacetRequest("tags", 50))
 
 	res, err := si.index.Search(req)
 	if err != nil {
-		return nil, fmt.Errorf("search failed: %w", err)
+		return nil, nil, fmt.Errorf("search failed: %w", err)
 	}
 
 	results := make([]Result, 0, len(res.Hits))
@@ -131,10 +159,33 @@ func (si *Index) Search(searchQuery string, limit int) ([]Result, error) {
 		if title, ok := hit.Fields["title"].(string); ok {
 			r.Title = title
 		}
+		if tags, ok := hit.Fields["tags"]; ok {
+			switch v := tags.(type) {
+			case string:
+				r.Tags = []string{v}
+			case []interface{}:
+				for _, t := range v {
+					if s, ok := t.(string); ok {
+						r.Tags = append(r.Tags, s)
+					}
+				}
+			}
+		}
 		results = append(results, r)
 	}
 
-	return results, nil
+	var facets map[string][]FacetEntry
+	if tagFacet, ok := res.Facets["tags"]; ok && len(tagFacet.Terms.Terms()) > 0 {
+		facets = map[string][]FacetEntry{}
+		for _, term := range tagFacet.Terms.Terms() {
+			facets["tags"] = append(facets["tags"], FacetEntry{
+				Term:  term.Term,
+				Count: term.Count,
+			})
+		}
+	}
+
+	return results, facets, nil
 }
 
 func (si *Index) IndexNode(node models.Node) error {
@@ -142,6 +193,7 @@ func (si *Index) IndexNode(node models.Node) error {
 		Path:    node.Path,
 		Title:   node.Title,
 		Content: node.Content,
+		Tags:    parseTags(node.Meta),
 	}
 	return si.index.Index(node.Path, doc)
 }

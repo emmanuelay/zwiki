@@ -142,13 +142,17 @@ func (a *Api) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results, err := a.search.Search(q, 20)
+	results, facets, err := a.search.Search(q, 20)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("search failed: %v", err))
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]interface{}{"results": results})
+	response := map[string]interface{}{"results": results}
+	if facets != nil {
+		response["facets"] = facets
+	}
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *Api) GetTags(w http.ResponseWriter, r *http.Request) {

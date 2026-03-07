@@ -13,6 +13,9 @@ let savedMeta = null;
 
 let searchDebounceTimer = null;
 let searchActiveIndex = -1;
+let lastSearchResults = [];
+let lastSearchFacets = {};
+let activeSearchFilters = new Set();
 
 function onLoad(event) {
 	document.getElementById("btn-edit").addEventListener("click", toggleEditor);
@@ -880,7 +883,12 @@ function openSearch() {
 	const input = document.getElementById("search-input");
 	input.value = "";
 	document.getElementById("search-results").innerHTML = "";
+	document.getElementById("search-facets").innerHTML = "";
+	document.getElementById("search-facets").classList.add("hidden");
 	searchActiveIndex = -1;
+	lastSearchResults = [];
+	lastSearchFacets = {};
+	activeSearchFilters.clear();
 	setTimeout(() => input.focus(), 50);
 }
 
@@ -889,33 +897,94 @@ function closeSearch(e) {
 	document.getElementById("search-backdrop").classList.add("hidden");
 	document.getElementById("search-input").value = "";
 	document.getElementById("search-results").innerHTML = "";
+	document.getElementById("search-facets").innerHTML = "";
+	document.getElementById("search-facets").classList.add("hidden");
 	searchActiveIndex = -1;
+	lastSearchResults = [];
+	lastSearchFacets = {};
+	activeSearchFilters.clear();
 }
 
 async function performSearch(query) {
-	const results = document.getElementById("search-results");
+	const resultsEl = document.getElementById("search-results");
+	const facetsEl = document.getElementById("search-facets");
+
 	if (!query) {
-		results.innerHTML = "";
+		resultsEl.innerHTML = "";
+		facetsEl.innerHTML = "";
+		facetsEl.classList.add("hidden");
 		searchActiveIndex = -1;
+		lastSearchResults = [];
+		lastSearchFacets = {};
+		activeSearchFilters.clear();
 		return;
 	}
 
 	const response = await fetch("/api/search?q=" + encodeURIComponent(query));
 	if (!response.ok) {
-		results.innerHTML = '<div class="search-empty">Search failed</div>';
+		resultsEl.innerHTML = '<div class="search-empty">Search failed</div>';
 		return;
 	}
 
 	const data = await response.json();
 	searchActiveIndex = -1;
+	activeSearchFilters.clear();
+	lastSearchResults = data.results || [];
+	lastSearchFacets = (data.facets && data.facets.tags) ? data.facets.tags : [];
 
-	if (!data.results || data.results.length === 0) {
-		results.innerHTML = '<div class="search-empty">No results found</div>';
+	renderSearchFacets();
+	renderSearchResults();
+}
+
+function renderSearchFacets() {
+	const facetsEl = document.getElementById("search-facets");
+	facetsEl.innerHTML = "";
+
+	if (lastSearchFacets.length === 0) {
+		facetsEl.classList.add("hidden");
 		return;
 	}
 
-	results.innerHTML = "";
-	data.results.forEach((item, idx) => {
+	facetsEl.classList.remove("hidden");
+	for (const facet of lastSearchFacets) {
+		const chip = document.createElement("span");
+		chip.className = "search-facet-chip" + (activeSearchFilters.has(facet.term) ? " active" : "");
+		chip.textContent = facet.term + " (" + facet.count + ")";
+		chip.addEventListener("click", () => {
+			if (activeSearchFilters.has(facet.term)) {
+				activeSearchFilters.delete(facet.term);
+			} else {
+				activeSearchFilters.add(facet.term);
+			}
+			renderSearchFacets();
+			renderSearchResults();
+		});
+		facetsEl.appendChild(chip);
+	}
+}
+
+function renderSearchResults() {
+	const resultsEl = document.getElementById("search-results");
+	searchActiveIndex = -1;
+
+	let filtered = lastSearchResults;
+	if (activeSearchFilters.size > 0) {
+		filtered = lastSearchResults.filter(item => {
+			if (!item.tags || item.tags.length === 0) return false;
+			for (const f of activeSearchFilters) {
+				if (!item.tags.includes(f)) return false;
+			}
+			return true;
+		});
+	}
+
+	if (filtered.length === 0) {
+		resultsEl.innerHTML = '<div class="search-empty">No results found</div>';
+		return;
+	}
+
+	resultsEl.innerHTML = "";
+	for (const item of filtered) {
 		const div = document.createElement("div");
 		div.className = "search-item";
 
@@ -937,8 +1006,8 @@ async function performSearch(query) {
 			loadNode(item.path);
 		});
 
-		results.appendChild(div);
-	});
+		resultsEl.appendChild(div);
+	}
 }
 
 function updateSearchActive(items) {

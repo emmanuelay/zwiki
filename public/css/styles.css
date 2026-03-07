@@ -95,3 +95,45 @@
 	font-size: 0.8125rem;
 	color: #9ca3af;
 }
+
+/* Search facet chips */
+.search-facet-chip {
+	display: inline-block;
+	font-size: 0.675rem;
+	font-weight: 500;
+	padding: 0.15rem 0.5rem;
+	background-color: #f3f4f6;
+	color: #6b7280;
+	border-radius: 9999px;
+	cursor: pointer;
+	border: 1px solid #e5e7eb;
+	transition: all 0.15s ease;
+}
+
+.search-facet-chip:hover {
+	border-color: #7c3aed;
+	color: #7c3aed;
+}
+
+.search-facet-chip.active {
+	background-color: #7c3aed;
+	border-color: #7c3aed;
+	color: #fff;
+}
+
+:root.dark .search-facet-chip {
+	background-color: #1f2937;
+	color: #9ca3af;
+	border-color: #374151;
+}
+
+:root.dark .search-facet-chip:hover {
+	border-color: #7c3aed;
+	color: #a78bfa;
+}
+
+:root.dark .search-facet-chip.active {
+	background-color: #7c3aed;
+	border-color: #7c3aed;
+	color: #fff;
+}
