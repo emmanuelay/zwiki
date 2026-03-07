@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/emmanuelay/zwiki/models"
 	"github.com/emmanuelay/zwiki/nodes"
 	assets "github.com/emmanuelay/zwiki/public"
 	"github.com/emmanuelay/zwiki/search"
@@ -47,6 +49,7 @@ func (api *Api) Serve() {
 		apiRouter.Post("/create", api.CreateNode)
 		apiRouter.Delete("/delete", api.DeleteNode)
 		apiRouter.Get("/search", api.Search)
+		apiRouter.Get("/tags", api.GetTags)
 	})
 
 	r.Handle("/*", fs)
@@ -146,6 +149,47 @@ func (a *Api) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{"results": results})
+}
+
+func (a *Api) GetTags(w http.ResponseWriter, r *http.Request) {
+	folder, err := a.repo.GetAll(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "failed loading nodes")
+		return
+	}
+
+	tagSet := map[string]bool{}
+	allNodes := flattenFolder(folder)
+	for _, n := range allNodes {
+		if n.Meta == nil {
+			continue
+		}
+		if tags, ok := n.Meta["tags"]; ok {
+			for _, t := range strings.Split(tags, ",") {
+				t = strings.TrimSpace(t)
+				if t != "" {
+					tagSet[t] = true
+				}
+			}
+		}
+	}
+
+	tags := make([]string, 0, len(tagSet))
+	for t := range tagSet {
+		tags = append(tags, t)
+	}
+	sort.Strings(tags)
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{"tags": tags})
+}
+
+func flattenFolder(folder models.Folder) []models.Node {
+	var result []models.Node
+	result = append(result, folder.Nodes...)
+	for _, sub := range folder.Folders {
+		result = append(result, flattenFolder(sub)...)
+	}
+	return result
 }
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {

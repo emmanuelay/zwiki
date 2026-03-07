@@ -7,6 +7,9 @@ let savedContent = "";
 let currentPath = "";
 let currentMeta = null;
 let editing = false;
+let allTags = [];
+let tagsModified = false;
+let savedMeta = null;
 
 let searchDebounceTimer = null;
 let searchActiveIndex = -1;
@@ -21,12 +24,23 @@ function onLoad(event) {
 	initResizeHandle();
 	initSearch();
 
+	document.addEventListener("keydown", (e) => {
+		if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+			e.preventDefault();
+			const btnSave = document.getElementById("btn-save");
+			if (!btnSave.classList.contains("hidden") && !btnSave.disabled) {
+				saveNode();
+			}
+		}
+	});
+
 	// Restore dark mode preference (system default unless overridden)
 	applyDarkMode();
 	window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
 		if (localStorage.getItem("darkMode") === null) applyDarkMode();
 	});
 
+	fetchAllTags();
 	fetchTree()
 		.then(tree => {
 			nodeIndex = flattenNodes(tree);
@@ -89,9 +103,16 @@ function toggleEditor() {
 }
 
 async function saveNode() {
-	const editor = document.getElementById("editor");
-	const content = editor.value;
-	const meta = collectFrontmatter();
+	let content, meta;
+
+	if (editing) {
+		const editor = document.getElementById("editor");
+		content = editor.value;
+		meta = collectFrontmatter();
+	} else {
+		content = currentContent;
+		meta = currentMeta || {};
+	}
 
 	const response = await fetch('/api/update?node=' + encodeURIComponent(currentPath), {
 		method: 'PUT',
@@ -107,8 +128,17 @@ async function saveNode() {
 	savedContent = content;
 	currentContent = content;
 	currentMeta = Object.keys(meta).length > 0 ? meta : null;
-	editing = true;
-	toggleEditor();
+	savedMeta = currentMeta ? { ...currentMeta } : null;
+	tagsModified = false;
+
+	if (editing) {
+		editing = true;
+		toggleEditor();
+	} else {
+		document.getElementById("btn-save").classList.add("hidden");
+	}
+
+	fetchAllTags();
 	refreshTree();
 }
 
@@ -282,6 +312,8 @@ async function loadNode(path) {
 	currentContent = node.data.content;
 	savedContent = node.data.content;
 	currentMeta = node.data.meta;
+	savedMeta = currentMeta ? { ...currentMeta } : null;
+	tagsModified = false;
 	const viewer = document.getElementById("viewer");
 
 	// Reset to viewer mode
@@ -404,23 +436,184 @@ function buildOutlineList(entries) {
 	return ul;
 }
 
-function renderTags(container, meta) {
-	if (!meta || !meta.tags) return;
+async function fetchAllTags() {
+	const response = await fetch("/api/tags");
+	if (response.ok) {
+		const data = await response.json();
+		allTags = data.tags || [];
+	}
+}
 
+function renderTags(container, meta) {
 	const tagsEl = document.createElement("div");
 	tagsEl.id = "content-tags";
-	tagsEl.className = "flex flex-wrap gap-1.5 mb-4";
+	tagsEl.className = "flex flex-wrap items-center gap-1.5 mb-4";
 
-	const tags = meta.tags.split(",");
-	for (const tag of tags) {
-		const trimmed = tag.trim();
-		const span = document.createElement("span");
-		span.innerText = trimmed;
-		span.addEventListener("click", () => searchByTag(trimmed));
-		tagsEl.appendChild(span);
+	const currentTags = getCurrentTags(meta);
+	for (const tag of currentTags) {
+		tagsEl.appendChild(createTagChip(tag));
 	}
 
+	tagsEl.appendChild(createTagInput());
 	container.appendChild(tagsEl);
+}
+
+function getCurrentTags(meta) {
+	if (!meta || !meta.tags) return [];
+	return meta.tags.split(",").map(t => t.trim()).filter(t => t !== "");
+}
+
+function createTagChip(tag) {
+	const span = document.createElement("span");
+	span.className = "tag-chip";
+
+	const text = document.createElement("span");
+	text.className = "tag-chip-text";
+	text.textContent = tag;
+	text.addEventListener("click", () => searchByTag(tag));
+	span.appendChild(text);
+
+	const removeBtn = document.createElement("span");
+	removeBtn.className = "tag-chip-remove";
+	removeBtn.innerHTML = "&times;";
+	removeBtn.addEventListener("click", (e) => {
+		e.stopPropagation();
+		removeTag(tag);
+	});
+	span.appendChild(removeBtn);
+
+	return span;
+}
+
+function createTagInput() {
+	const wrapper = document.createElement("div");
+	wrapper.className = "tag-input-wrapper";
+
+	const input = document.createElement("input");
+	input.type = "text";
+	input.id = "tag-input";
+	input.placeholder = "Add tag...";
+	input.className = "tag-input";
+	input.autocomplete = "off";
+
+	const dropdown = document.createElement("div");
+	dropdown.id = "tag-dropdown";
+	dropdown.className = "tag-dropdown hidden";
+
+	input.addEventListener("input", () => {
+		tagDropdownIndex = -1;
+		const val = input.value.trim().toLowerCase();
+		dropdown.innerHTML = "";
+		if (!val) {
+			dropdown.classList.add("hidden");
+			return;
+		}
+		const currentTags = getCurrentTags(currentMeta);
+		const matches = allTags.filter(t =>
+			t.toLowerCase().includes(val) && !currentTags.includes(t)
+		);
+		if (matches.length === 0) {
+			dropdown.classList.add("hidden");
+			return;
+		}
+		for (const match of matches) {
+			const item = document.createElement("div");
+			item.className = "tag-dropdown-item";
+			item.textContent = match;
+			item.addEventListener("mousedown", (e) => {
+				e.preventDefault();
+				addTag(match);
+				input.value = "";
+				dropdown.classList.add("hidden");
+			});
+			dropdown.appendChild(item);
+		}
+		dropdown.classList.remove("hidden");
+	});
+
+	let tagDropdownIndex = -1;
+
+	input.addEventListener("keydown", (e) => {
+		const items = dropdown.querySelectorAll(".tag-dropdown-item");
+		if (e.key === "ArrowDown") {
+			e.preventDefault();
+			tagDropdownIndex = Math.min(tagDropdownIndex + 1, items.length - 1);
+			updateTagDropdownActive(items, tagDropdownIndex);
+		} else if (e.key === "ArrowUp") {
+			e.preventDefault();
+			tagDropdownIndex = Math.max(tagDropdownIndex - 1, -1);
+			updateTagDropdownActive(items, tagDropdownIndex);
+		} else if (e.key === "Enter") {
+			e.preventDefault();
+			if (tagDropdownIndex >= 0 && items[tagDropdownIndex]) {
+				addTag(items[tagDropdownIndex].textContent);
+			} else {
+				const val = input.value.trim();
+				if (val) addTag(val);
+			}
+			input.value = "";
+			dropdown.classList.add("hidden");
+			tagDropdownIndex = -1;
+		} else if (e.key === "Escape") {
+			input.value = "";
+			dropdown.classList.add("hidden");
+			tagDropdownIndex = -1;
+		}
+	});
+
+	input.addEventListener("blur", () => {
+		dropdown.classList.add("hidden");
+	});
+
+	wrapper.appendChild(input);
+	wrapper.appendChild(dropdown);
+	return wrapper;
+}
+
+function updateTagDropdownActive(items, activeIndex) {
+	items.forEach((el, i) => {
+		el.classList.toggle("active", i === activeIndex);
+	});
+	if (items[activeIndex]) {
+		items[activeIndex].scrollIntoView({ block: "nearest" });
+	}
+}
+
+function addTag(tag) {
+	const currentTags = getCurrentTags(currentMeta);
+	if (currentTags.includes(tag)) return;
+	currentTags.push(tag);
+	updateMetaTags(currentTags);
+}
+
+function removeTag(tag) {
+	const currentTags = getCurrentTags(currentMeta).filter(t => t !== tag);
+	updateMetaTags(currentTags);
+}
+
+function updateMetaTags(tags) {
+	if (!currentMeta) currentMeta = {};
+	if (tags.length > 0) {
+		currentMeta.tags = tags.join(", ");
+	} else {
+		delete currentMeta.tags;
+	}
+	tagsModified = true;
+
+	// Re-render tags in viewer
+	const container = document.getElementById("content-tags");
+	if (container) {
+		container.innerHTML = "";
+		for (const tag of tags) {
+			container.appendChild(createTagChip(tag));
+		}
+		container.appendChild(createTagInput());
+	}
+
+	// Show save button
+	const btnSave = document.getElementById("btn-save");
+	btnSave.classList.remove("hidden");
+	btnSave.disabled = false;
 }
 
 function searchByTag(tag) {
