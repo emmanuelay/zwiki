@@ -9,6 +9,7 @@ import (
 	"github.com/emmanuelay/zwiki/nodes"
 	"github.com/emmanuelay/zwiki/search"
 	"github.com/emmanuelay/zwiki/server"
+	"github.com/emmanuelay/zwiki/watcher"
 )
 
 func main() {
@@ -43,6 +44,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	api := server.NewApi(port, fsRepo, searchIndex)
+	w, err := watcher.New(path, fsRepo, searchIndex)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create file watcher: %v\n", err)
+		os.Exit(1)
+	}
+	defer w.Close()
+
+	api := server.NewApi(port, fsRepo, searchIndex, w)
 	api.Serve()
 }

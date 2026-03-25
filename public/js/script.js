@@ -16,6 +16,8 @@ let searchActiveIndex = -1;
 let lastSearchResults = [];
 let lastSearchFacets = {};
 let activeSearchFilters = new Set();
+let lastSaveTime = 0;
+let sseRefreshTimer = null;
 
 function onLoad(event) {
 	document.getElementById("btn-edit").addEventListener("click", toggleEditor);
@@ -49,13 +51,19 @@ function onLoad(event) {
 			nodeIndex = flattenNodes(tree);
 			setupWikiLinks();
 			renderTree(tree);
-			if (tree.nodes && tree.nodes.length > 0) {
+			const lastPath = localStorage.getItem("currentNode");
+			const hasLastNode = lastPath && nodeIndex.some(n => n.path === lastPath);
+			if (hasLastNode) {
+				loadNode(lastPath);
+			} else if (tree.nodes && tree.nodes.length > 0) {
 				loadNode(tree.nodes[0].path);
 			}
 		})
 		.catch(error => {
 			console.log("fetch failed", error)
 		});
+
+	connectSSE();
 }
 
 function onEditorInput() {
@@ -141,6 +149,7 @@ async function saveNode() {
 		document.getElementById("btn-save").classList.add("hidden");
 	}
 
+	lastSaveTime = Date.now();
 	fetchAllTags();
 	refreshTree();
 }
@@ -235,6 +244,44 @@ async function refreshTree() {
 	});
 }
 
+function connectSSE() {
+	const evtSource = new EventSource('/api/events');
+
+	evtSource.addEventListener('tree-changed', () => {
+		// Skip if we just saved (within 1 second)
+		if (Date.now() - lastSaveTime < 1000) return;
+
+		clearTimeout(sseRefreshTimer);
+		sseRefreshTimer = setTimeout(() => {
+			refreshTreeFromSSE();
+		}, 200);
+	});
+
+	evtSource.onerror = () => {
+		console.log('SSE connection lost, will auto-reconnect');
+	};
+}
+
+async function refreshTreeFromSSE() {
+	const selectedPath = currentPath;
+
+	await refreshTree();
+
+	if (selectedPath) {
+		const stillExists = nodeIndex.some(n => n.path === selectedPath);
+		if (stillExists) {
+			revealInTree(selectedPath);
+		} else if (!editing) {
+			document.getElementById("content-title").innerText = "File removed";
+			document.getElementById("viewer").innerHTML =
+				"<p>The file you were viewing was removed or renamed.</p>";
+			currentPath = "";
+		}
+	}
+
+	fetchAllTags();
+}
+
 function renderTree(tree) {
 	const rootNode = document.getElementById("tree");
 
@@ -312,6 +359,7 @@ async function loadNode(path) {
 
 	// Store raw content and render
 	currentPath = path;
+	localStorage.setItem("currentNode", path);
 	currentContent = node.data.content;
 	savedContent = node.data.content;
 	currentMeta = node.data.meta;

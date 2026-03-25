@@ -3,6 +3,7 @@ package search
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search/query"
@@ -30,7 +31,9 @@ type FacetEntry struct {
 }
 
 type Index struct {
-	index bleve.Index
+	index        bleve.Index
+	indexedPaths map[string]bool
+	mu           sync.RWMutex
 }
 
 func NewIndex() (*Index, error) {
@@ -65,12 +68,15 @@ func NewIndex() (*Index, error) {
 		return nil, fmt.Errorf("failed creating in-memory index: %w", err)
 	}
 
-	return &Index{index: idx}, nil
+	return &Index{index: idx, indexedPaths: make(map[string]bool)}, nil
 }
 
 func (si *Index) BuildFromFolder(folder models.Folder, repo nodeReader) error {
 	nodes := flattenFolder(folder)
 	batch := si.index.NewBatch()
+
+	si.mu.Lock()
+	defer si.mu.Unlock()
 
 	for _, n := range nodes {
 		content, err := readNodeContent(repo, n.Path)
@@ -84,6 +90,46 @@ func (si *Index) BuildFromFolder(folder models.Folder, repo nodeReader) error {
 			Tags:    parseTags(n.Meta),
 		}
 		batch.Index(n.Path, doc)
+		si.indexedPaths[n.Path] = true
+	}
+
+	return si.index.Batch(batch)
+}
+
+func (si *Index) Rebuild(folder models.Folder, repo nodeReader) error {
+	nodes := flattenFolder(folder)
+
+	currentPaths := make(map[string]bool, len(nodes))
+	for _, n := range nodes {
+		currentPaths[n.Path] = true
+	}
+
+	si.mu.Lock()
+	defer si.mu.Unlock()
+
+	// Delete stale entries
+	for path := range si.indexedPaths {
+		if !currentPaths[path] {
+			si.index.Delete(path)
+			delete(si.indexedPaths, path)
+		}
+	}
+
+	// Re-index all current nodes
+	batch := si.index.NewBatch()
+	for _, n := range nodes {
+		content, err := readNodeContent(repo, n.Path)
+		if err != nil {
+			continue
+		}
+		doc := Document{
+			Path:    n.Path,
+			Title:   n.Title,
+			Content: content,
+			Tags:    parseTags(n.Meta),
+		}
+		batch.Index(n.Path, doc)
+		si.indexedPaths[n.Path] = true
 	}
 
 	return si.index.Batch(batch)

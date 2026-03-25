@@ -13,21 +13,24 @@ import (
 	"github.com/emmanuelay/zwiki/nodes"
 	assets "github.com/emmanuelay/zwiki/public"
 	"github.com/emmanuelay/zwiki/search"
+	"github.com/emmanuelay/zwiki/watcher"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
 
 type Api struct {
-	port   int
-	repo   nodes.Repository
-	search *search.Index
+	port    int
+	repo    nodes.Repository
+	search  *search.Index
+	watcher *watcher.Watcher
 }
 
-func NewApi(port int, repo nodes.Repository, searchIndex *search.Index) *Api {
+func NewApi(port int, repo nodes.Repository, searchIndex *search.Index, w *watcher.Watcher) *Api {
 	return &Api{
-		port:   port,
-		repo:   repo,
-		search: searchIndex,
+		port:    port,
+		repo:    repo,
+		search:  searchIndex,
+		watcher: w,
 	}
 }
 
@@ -40,16 +43,22 @@ func (api *Api) Serve() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/api", func(apiRouter chi.Router) {
-		apiRouter.Get("/all", api.GetAll)
-		apiRouter.Get("/get", api.GetNode)
-		apiRouter.Put("/update", api.UpdateNode)
-		apiRouter.Post("/create", api.CreateNode)
-		apiRouter.Delete("/delete", api.DeleteNode)
-		apiRouter.Get("/search", api.Search)
-		apiRouter.Get("/tags", api.GetTags)
+		// SSE endpoint without timeout (long-lived connection)
+		apiRouter.Get("/events", api.SSEHandler)
+
+		// REST endpoints with timeout
+		apiRouter.Group(func(gr chi.Router) {
+			gr.Use(middleware.Timeout(60 * time.Second))
+			gr.Get("/all", api.GetAll)
+			gr.Get("/get", api.GetNode)
+			gr.Put("/update", api.UpdateNode)
+			gr.Post("/create", api.CreateNode)
+			gr.Delete("/delete", api.DeleteNode)
+			gr.Get("/search", api.Search)
+			gr.Get("/tags", api.GetTags)
+		})
 	})
 
 	r.Handle("/*", fs)
@@ -185,6 +194,39 @@ func (a *Api) GetTags(w http.ResponseWriter, r *http.Request) {
 	sort.Strings(tags)
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{"tags": tags})
+}
+
+func (a *Api) SSEHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		respondWithError(w, http.StatusInternalServerError, "streaming not supported")
+		return
+	}
+
+	ch := a.watcher.Subscribe()
+	defer a.watcher.Unsubscribe(ch)
+
+	// Send initial keepalive
+	fmt.Fprintf(w, ": keepalive\n\n")
+	flusher.Flush()
+
+	for {
+		select {
+		case event, ok := <-ch:
+			if !ok {
+				return
+			}
+			fmt.Fprintf(w, "event: %s\ndata: {\"ts\":%d}\n\n", event, time.Now().Unix())
+			flusher.Flush()
+		case <-r.Context().Done():
+			return
+		}
+	}
 }
 
 func flattenFolder(folder models.Folder) []models.Node {

@@ -15,7 +15,7 @@ import (
 func initApi() *server.Api {
 	repo := nodes.NewFileSystemRepository("../tests/")
 	searchIndex, _ := search.NewIndex()
-	api := server.NewApi(8080, repo, searchIndex)
+	api := server.NewApi(8080, repo, searchIndex, nil)
 	return api
 }
 
